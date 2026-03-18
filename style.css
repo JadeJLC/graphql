@@ -1,0 +1,274 @@
+/* #region ***** Définition des variables */
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Exo+2:wght@300;400;600&family=Montserrat:wght@300;400&family=JetBrains+Mono&display=swap");
+
+:root {
+  --dusk-blue: #38506fff;
+  --blue-slate: #57668aff;
+  --pale-sky: #c3dde7ff;
+  --pacific-cyan: #4992a0ff;
+  --space-indigo: #33304aff;
+  --violet: rgba(216, 145, 228, 0.795);
+  --ink-black: #0f1825ff;
+
+  --border-shine: #d6f1f8b9;
+  --form-back: rgba(56, 80, 111, 0.651);
+  --degrade: linear-gradient(
+    280deg,
+    rgba(185, 120, 196, 1) 0%,
+    rgba(104, 213, 217, 1) 100%
+  );
+
+  --font-title: "Cinzel", serif;
+  --font-tech-ui: "Exo 2", sans-serif;
+  --font-clean-body: "Montserrat", sans-serif;
+  --font-code-mono: "JetBrains Mono", monospace;
+}
+
+.is-hidden {
+  display: none;
+}
+/* #endregion ***** Définition des variables  */
+
+/* #region ***** Fond de page et header */
+body {
+  background-image: url("background.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+header {
+  width: 96%;
+  background-color: var(--form-back);
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  padding: 20px 2%;
+  color: var(--pale-sky);
+  font-family: var(--font-tech-ui);
+}
+
+#header-username {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+#logout-btn {
+  float: right;
+  cursor: pointer;
+}
+
+#logout-btn svg {
+  position: relative;
+  top: 5px;
+  margin-right: 5px;
+}
+
+/* #endregion ***** Fond de page et header */
+
+/* #region ***** Formulaire de connexion */
+.form-bloc {
+  padding: 15px 30px;
+  width: 50vw;
+  max-width: 600px;
+  border-radius: 10px;
+  border: 2px solid var(--violet);
+  background: var(--form-back);
+  text-align: center;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translateY(-50%) translateX(-50%);
+}
+
+.form-bloc h2 {
+  margin: 0px;
+  font-size: 1.4em;
+}
+
+.login-label,
+.form-bloc h2 {
+  font-family: var(--font-title);
+  filter: brightness(200);
+  text-shadow: 3px 2px 3px rgba(0, 0, 0, 0.2);
+  color: var(--pale-sky);
+  text-transform: uppercase;
+}
+
+.subtitle {
+  font-family: var(--font-clean-body);
+  color: var(--pale-sky);
+  font-size: 0.65em;
+  display: block;
+  margin-bottom: 15px;
+}
+
+.login-label {
+  font-size: 1em;
+  display: block;
+  margin-top: 10px;
+}
+
+.login-input {
+  font-size: 1.1em;
+  margin-top: 5px;
+}
+
+.login-input,
+.login-details {
+  background: var(--blue-slate);
+  border: 2px solid var(--pale-sky);
+  padding: 7px;
+  border-radius: 10px;
+  width: 80%;
+  max-width: 350px;
+  display: block;
+  margin: auto;
+  text-shadow: 3px 2px 3px rgba(0, 0, 0, 0.2);
+  color: var(--pale-sky);
+  box-shadow: 0 0 12px var(--border-shine);
+}
+
+.login-input::placeholder {
+  color: var(--violet);
+}
+
+/* Section mot de passe */
+.password-zone {
+  display: flex;
+  width: 80%;
+  max-width: 380px;
+  margin: auto;
+}
+
+#password {
+  width: 100%;
+  margin-left: initial;
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+
+#show-password {
+  color: var(--border-shine);
+  cursor: pointer;
+  border: 2px solid var(--pale-sky);
+  box-shadow: 0 0 12px var(--border-shine);
+  border-left: none;
+  border-radius: 10px;
+  width: 30px;
+  text-align: center;
+  flex-shrink: 0;
+  border-bottom-left-radius: 0px;
+  border-top-left-radius: 0px;
+  margin-top: 5px;
+  line-height: 100%;
+  padding: 8px;
+}
+
+/* Section identifiant */
+.login-details {
+  border-top: none;
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+  font-style: italic;
+  font-size: 0.8em;
+}
+
+#identifier {
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+
+/* Bouton de connexion  */
+/* Before : triangle de gauche ---- After : triangle de droite */
+.connect-btn {
+  position: relative;
+  display: inline-block;
+  font-family: "Exo 2", sans-serif;
+  text-transform: uppercase;
+  cursor: pointer;
+  margin: 50px 20px 10px 20px;
+  background: var(--degrade);
+  padding: 10px 0px;
+  width: 350px;
+  border: 6px double var(--pacific-cyan);
+  font-family: var(--font-title);
+  font-size: 1.2em;
+  color: white;
+  border-radius: 20px;
+  text-shadow: 3px 2px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 12px var(--pacific-cyan);
+  transition: all 1s ease;
+}
+
+.connect-btn:hover {
+  letter-spacing: 1.2px;
+  filter: brightness(1.2);
+}
+
+.connect-btn::before,
+.connect-btn::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 15px;
+  height: 40px;
+  background-color: var(--violet);
+  clip-path: polygon(100% 0, 0 50%, 100% 100%, 80% 50%);
+  box-shadow: 0 0 10px var(--pacific-cyan);
+  transition: all 1s ease;
+}
+
+.connect-btn::before {
+  left: -25px;
+}
+
+.connect-btn:hover::before {
+  left: -30px;
+  filter: brightness(1.2);
+}
+
+.connect-btn::after {
+  right: -25px;
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.connect-btn:hover::after {
+  right: -30px;
+  filter: brightness(1.2);
+}
+
+/* Message d'erreur dans la connexion */
+.login-alert {
+  background-color: var(--dusk-blue);
+  border: 2px solid var(--blue-slate);
+  color: var(--pale-sky);
+  font-family: var(--font-clean-body);
+  border-radius: 10px;
+  margin: 20px auto 0px auto;
+  width: 390px;
+  padding: 5px;
+}
+
+.login-alert svg {
+  float: left;
+  margin-left: 5px;
+  color: var(--pale-sky);
+}
+
+.login-alert:hover svg,
+.login-alert:hover {
+  color: white;
+}
+
+/* #endregion ***** Formulaire de connexion */
+
+/* #region ***** Tableau de bord */
+.dashboard-bloc {
+  color: white;
+  margin-top: 100px;
+}
+
+/* #endregion ***** Tableau de bord */

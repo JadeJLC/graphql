@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GraphQL</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script type="module" src="init.js"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <span id="logout-btn" class="is-hidden">
+        <i data-lucide="log-out"> </i> Déconnexion
+      </span>
+      Tableau de bord Zone01
+      <span id="header-username"></span>
+    </header>
+    <form name="login-form" method="post" id="login-page" class="form-bloc">
+      <h2>Veuillez vous connecter</h2>
+      <span class="subtitle"
+        >Seuls les utilisateurs connectés peuvent accéder au tableau de
+        bord.</span
+      >
+      <label for="identifier" class="login-label">Identifiant</label>
+      <input
+        type="text"
+        name="identifier"
+        id="identifier"
+        class="login-input"
+        placeholder="Saisir votre identifiant"
+        required
+      />
+      <span class="login-details">Nom d'utilisateur ou email</span>
+      <br />
+      <label for="password" class="login-label">Mot de passe</label>
+
+      <div class="password-zone">
+        <input
+          type="password"
+          name="password"
+          id="password"
+          class="login-input"
+          placeholder="Saisir votre mot de passe"
+          required
+        />
+
+        <div id="show-password-zone" title="Afficher le mot de passe">
+          <i id="show-password" data-lucide="eye"></i>
+        </div>
+      </div>
+
+      <div class="login-alert is-hidden" id="login-alert">
+        <i data-lucide="triangle-alert"></i>
+        Erreur de connexion : Identifiants invalides
+      </div>
+      <button type="submit" class="connect-btn">Se connecter</button>
+    </form>
+
+    <div id="dashboard-page" class="is-hidden dashboard-bloc"></div>
+
+    <footer class="is-hidden">
+      <a
+        href="https://www.flaticon.com/free-icons/universe"
+        title="universe icons"
+        >Universe icons created by Freepik - Flaticon</a
+      >
+    </footer>
+  </body>
+</html>
