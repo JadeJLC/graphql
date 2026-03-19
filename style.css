@@ -377,13 +377,24 @@ header {
   background-color: var(--pacific-cyan);
 }
 
-#dashboard-left img {
+#user-profile img {
   width: 22%;
   border: 4px ridge var(--pacific-cyan);
   border-radius: 20px;
   background-color: var(--blue-slate);
   float: left;
   margin-right: 5px;
+  flex-shrink: 0;
+}
+
+.profile-data {
+  display: flex;
+}
+
+.profile-data > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
 }
 
 .bloc-username,
@@ -396,6 +407,11 @@ header {
 
 .bloc-xp {
   text-align: center;
+}
+
+#user-exp .subtitle {
+  font-size: 0.8em;
+  letter-spacing: 0.1em;
 }
 
 .bloc-infos {

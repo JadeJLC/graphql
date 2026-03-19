@@ -51,12 +51,71 @@ async function getUserInfo(jwtoken) {
     lastName
     avatarUrl
     createdAt
-    roles
+
+    labels {
+    labelName
+}
+
+    
+    transactions(
+      where: { 
+        type: { _eq: "level" }, 
+        path: { _like: "%div-01%" } 
+      }
+      order_by: { amount: desc }
+      limit: 1
+    ) {
+      amount
+    }
+      
+    xp: transactions_aggregate(
+    where: {
+        type: { _eq: "xp" }
+        path: { _like: "%div-01%" _nlike: "%piscine%/%" }
+    }
+) {
+    aggregate {
+        sum {
+            amount
+        }
+  }
+}
+      
+   events(where: { event: { path: { _like: "%div-01%" } } }) {
+   createdAt
+        event {
+          id
+          campus
+          cohorts {
+            name
+          }
+        }
+      }
     }
   }
 `;
 
+  getXpRequirements(jwtoken);
   return await fetchFromDomain(query, {}, jwtoken);
+}
+
+async function getXpRequirements(jwtoken) {
+  const query = `query GetXP {
+  object(
+    where: { type: { _eq: "level" } }
+    order_by: { attrs: asc }
+    limit: 30
+  ) {
+    name
+    attrs
+  }
+}
+  `;
+
+  console.log(
+    "Palliers de niveaux :",
+    await fetchFromDomain(query, {}, jwtoken),
+  );
 }
 
 /**
@@ -73,6 +132,7 @@ async function getUserDashboard(userID, jwtoken) {
       createdAt
       path
     }
+
     progress(where: { userId: { _eq: $userID } }) {
       objectId
       grade
