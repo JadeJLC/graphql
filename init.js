@@ -15,7 +15,6 @@ function init() {
   const jwtoken = localStorage.getItem("jwt");
 
   if (jwtoken) {
-    console.log(jwtoken);
     logInSuccess(jwtoken);
   }
 

@@ -1,4 +1,5 @@
-import { getUserDashboard, getUserInfo } from "./getdata.js";
+import { getUserDashboard } from "./getdata.js";
+import { buildLevelTable, getRankName, formatTime } from "./helpers.js";
 
 /**
  * Transforme la page HTML avec les données récupérées
@@ -38,18 +39,22 @@ function createProfilePage(user) {
 
   createProfileBloc(user);
   createLevelBloc(user);
+  createSkillBloc(user);
 
   lucide.createIcons();
 }
 
+/**
+ * Génère le bloc "informations personnelles" du tableau de bord
+ * @param {GraphQL data} user Les données de l'utilisateur envoyées par le GraphQL
+ */
 function createProfileBloc(user) {
   const profileSection = document.getElementById("user-profile");
-  const rank = getRankName(user.transactions[0].amount);
+  const rank = getRankName(user.level[0].amount);
   const promoEvent = user.events.find((e) => e.event?.cohorts?.length > 0);
   const promoName = user.labels[0].labelName;
-  // const promoName = promoEvent?.event?.cohorts?.[0]?.name ?? "Promo inconnue";
+
   const signin = formatTime(promoEvent?.createdAt ?? user.createdAt);
-  console.log(signin);
 
   profileSection.innerHTML = `
   <h3 class="bloc-title">Informations personnelles</h3>
@@ -71,10 +76,14 @@ function createProfileBloc(user) {
             </div>`;
 }
 
+/**
+ * Génère le bloc "Expérience et niveau" du tableau de bord
+ * @param {GraphQL data} user Les données de l'utilisateur envoyées par le GraphQL
+ */
 function createLevelBloc(user) {
   const levelSection = document.getElementById("user-exp");
   const currentXP = user.xp.aggregate.sum.amount;
-  const currentLevel = user.transactions[0].amount;
+  const currentLevel = user.level[0].amount;
 
   const jn = buildLevelTable();
 
@@ -98,15 +107,37 @@ function createLevelBloc(user) {
           `;
 }
 
-function getRankName(level) {
-  if (level >= 60) return "Full-Stack Developer";
-  if (level >= 55) return "Confirmed Developer";
-  if (level >= 50) return "Junior Developer";
-  if (level >= 40) return "Basic Developer";
-  if (level >= 30) return "Assistant Developer";
-  if (level >= 20) return "Apprentice Developer";
-  if (level >= 10) return "Beginner Developer";
-  return "Aspiring Developer";
+/**
+ * Génère le bloc "Compétences" du tableau de bord
+ * @param {GraphQL data} user Les données de l'utilisateur envoyées par le GraphQL
+ */
+function createSkillBloc(user) {
+  const skills = getSkillTotal(user.skills);
+  const keys = Object.keys(skills);
+
+  // Reste à faire : classifier les compétences entre tech et langage
+  // Créer l'élément HTML avec des jolis "logos" pour chaque compétence
+}
+
+function getSkillTotal(skillList) {
+  const seen = new Set();
+
+  const skillLevel = skillList
+    .filter((skill) => {
+      if (seen.has(skill.object.name)) return false;
+      seen.add(skill.object.name);
+      return true;
+    })
+    .reduce((acc, skill) => {
+      skill.type = skill.type.replace("skill_", "");
+      if (!acc[skill.type] || skill.amount > acc[skill.type]) {
+        acc[skill.type] = skill.amount;
+      }
+      return acc;
+    }, {});
+
+  console.log(skillLevel);
+  console.log(keys);
 }
 
 /**
@@ -122,57 +153,4 @@ function displayLoginPage() {
   if (loginPage) loginPage.classList.remove("is-hidden");
 }
 
-function formatTime(dateString) {
-  const date = new Date(dateString);
-  const now = new Date();
-
-  const yesterday = new Date();
-  yesterday.setDate(now.getDate() - 1);
-
-  const dayMonth = date.toLocaleDateString("fr-FR", {
-    day: "2-digit",
-    month: "2-digit",
-  });
-
-  const year = date.getFullYear();
-
-  if (date.toDateString() === now.toDateString()) {
-    return `Aujourd'hui`;
-  }
-
-  if (date.toDateString() === yesterday.toDateString()) {
-    return `Hier`;
-  }
-
-  if (year === now.getFullYear()) {
-    return `${dayMonth}`;
-  } else {
-    return `${dayMonth}/${year}`;
-  }
-}
-
 export { createPage };
-
-function buildLevelTable() {
-  const Ue = 128;
-  const jn = Array(Ue + 1);
-  let Cr = -1,
-    Xl = 0,
-    Kl = 0;
-
-  for (; ++Cr < Ue + 1; ) {
-    const e = Cr * 0.66 + 1;
-    const t = (Cr + 2) * 150 + 50;
-    const r = Math.round(e * t);
-    Kl += r;
-    Xl += e;
-    jn[Cr] = {
-      level: Cr,
-      base: t,
-      cumul: Kl,
-      total: r,
-      xpIndex: Math.floor(Xl),
-    };
-  }
-  return jn;
-}

@@ -54,10 +54,9 @@ async function getUserInfo(jwtoken) {
 
     labels {
     labelName
-}
-
+    }
     
-    transactions(
+    level: transactions(
       where: { 
         type: { _eq: "level" }, 
         path: { _like: "%div-01%" } 
@@ -67,13 +66,27 @@ async function getUserInfo(jwtoken) {
     ) {
       amount
     }
+
+    skills: transactions (
+    where: {
+    type: {_like: "%skill%"}
+    }
+    order_by: {amount:desc}
+    ) {
+    type
+    amount
+      object {
+        name
+        attrs        
+      }
+    }
       
     xp: transactions_aggregate(
     where: {
         type: { _eq: "xp" }
-        path: { _like: "%div-01%" _nlike: "%piscine%/%" }
+        path: { _like: "%div-01%", _nlike: "%piscine%/%" }
     }
-) {
+    ) {
     aggregate {
         sum {
             amount
@@ -95,27 +108,7 @@ async function getUserInfo(jwtoken) {
   }
 `;
 
-  getXpRequirements(jwtoken);
   return await fetchFromDomain(query, {}, jwtoken);
-}
-
-async function getXpRequirements(jwtoken) {
-  const query = `query GetXP {
-  object(
-    where: { type: { _eq: "level" } }
-    order_by: { attrs: asc }
-    limit: 30
-  ) {
-    name
-    attrs
-  }
-}
-  `;
-
-  console.log(
-    "Palliers de niveaux :",
-    await fetchFromDomain(query, {}, jwtoken),
-  );
 }
 
 /**
