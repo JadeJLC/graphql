@@ -1,39 +1,6 @@
 const DOMAIN = "zone01normandie.org";
 import { createPage } from "./html-creation.js";
-
-/**
- * Récupère les données dans l'API graphQL pour les afficher sur la page
- * @param {token} jwtoken Le token de connexion pour récupérer les données de l'utilisateur
- */
-async function getGraphQLPage(jwtoken) {
-  const query = `
-  query GetUser {
-    user {
-    login
-    }
-  }
-`;
-  const response = await fetch(
-    `https://${DOMAIN}/api/graphql-engine/v1/graphql`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${jwtoken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ query: query }),
-    },
-  );
-
-  if (!response.ok) {
-    alert("Erreur de récupération des données");
-    return;
-  }
-
-  const data = await response.json();
-
-  createPage(data);
-}
+import { getUserInfo } from "./getdata.js";
 
 /**
  * Fonction principale de connexion : récupère les identifiants et les envoie à l'API
@@ -62,7 +29,7 @@ async function logIn(encodedData) {
  * Affiche le tableau de bord une fois la connexion réussie
  * @param {token} jwtoken Le token de connexion pour récupérer les données de l'utilisateur
  */
-function logInSuccess(jwtoken) {
+async function logInSuccess(jwtoken) {
   console.log("Connexion en cours");
   const alertZone = document.getElementById("login-alert");
   if (alertZone) alertZone.classList.add("is-hidden");
@@ -73,7 +40,9 @@ function logInSuccess(jwtoken) {
   const dashbooard = document.getElementById("dashboard-page");
   if (dashbooard) {
     dashbooard.classList.remove("is-hidden");
-    getGraphQLPage(jwtoken);
+    const userData = await getUserInfo(jwtoken);
+
+    createPage(userData, jwtoken);
   }
 
   localStorage.setItem("jwt", jwtoken);
@@ -131,4 +100,4 @@ function showHidePassword() {
   }
 }
 
-export { logInSuccess, sendFormData, logOut, showHidePassword };
+export { logInSuccess, sendFormData, logOut, showHidePassword, DOMAIN };

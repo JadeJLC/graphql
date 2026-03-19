@@ -1,32 +1,38 @@
+import { getUserDashboard, getUserInfo } from "./getdata.js";
+
 /**
  * Transforme la page HTML avec les données récupérées
  * @param {graphQLRequest / string} response Soit "logout" pour la déconnexion, soit les données récupérées en graphQL
  * @returns
  */
-function createPage(response) {
+async function createPage(response, jwtoken) {
   if (response === "logout") {
-    displayUsername();
+    displayUserInfo();
     displayLoginPage();
     return;
   }
 
-  const username = response.data.user[0].login;
-  displayUsername(username);
+  const user = response.data.user[0];
+  const userID = response.data.user[0].id;
+  displayUserInfo(user);
+
+  getUserDashboard(userID, jwtoken);
 }
 
 /**
- * Affiche le nom d'utilisateur dans le header
- * @param {string} username
+ * Affiche les infos de l'utilisateur sur son tableau de bord
+ * et dans le header
+ * @param {string} user Les informations de l'utilisateur
  */
-function displayUsername(username) {
-  const nameZone = document.getElementById("header-username");
+function displayUserInfo(user) {
+  const headername = document.getElementById("header-username");
 
   if (username) {
-    nameZone.innerHTML = `Connecté en tant que ${username}`;
+    headername.innerHTML = `Connecté en tant que ${user.login}`;
     const logoutBtn = document.getElementById("logout-btn");
     logoutBtn.classList.remove("is-hidden");
   } else {
-    nameZone.innerHTML = "";
+    headername.innerHTML = "";
   }
 }
 

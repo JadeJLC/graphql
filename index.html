@@ -14,7 +14,6 @@
         <i data-lucide="log-out"> </i> Déconnexion
       </span>
       Tableau de bord Zone01
-      <span id="header-username"></span>
     </header>
     <form name="login-form" method="post" id="login-page" class="form-bloc">
       <h2>Veuillez vous connecter</h2>
@@ -57,7 +56,65 @@
       <button type="submit" class="connect-btn">Se connecter</button>
     </form>
 
-    <div id="dashboard-page" class="is-hidden dashboard-bloc"></div>
+    <div id="dashboard-page" class="is-hidden dashboard-bloc">
+      <div class="dashboard-header">
+        <h1>
+          <div><img src="favicon.ico" alt="Logo" /></div>
+          Données de formations
+        </h1>
+        <h2 id="header-username">Utilisateur connecté : Nom test (pseudo)</h2>
+      </div>
+
+      <div class="dashboard-body">
+        <div id="dashboard-left">
+          <div class="user-profile">
+            <h3 class="bloc-title">Informations personnelles</h3>
+            <img src="default.png" alt="Avatar de l'utilisateur" />
+            <div class="bloc-username">Prénom Nom</div>
+            <div class="bloc-infos">Rang</div>
+            <div class="bloc-infos">Promo</div>
+            <div class="bloc-infos">
+              <i data-lucide="calendar-check"></i>
+              XX/XX/XXXX
+            </div>
+          </div>
+
+          <div class="user-exp">
+            <h3 class="bloc-title">Expérience (XP)</h3>
+            <div class="bloc-xp">Niveau actuel : X</div>
+            <div class="bloc-infos">
+              <div class="progress-bar">
+                <div style="width: 80%"></div>
+              </div>
+              <span class="subtitle">XXX/XXX xp</span>
+            </div>
+            <div class="bloc-infos next-level">Prochain niveau dans XX xp</div>
+          </div>
+
+          <div class="user-skills">
+            <h3 class="bloc-title">Compétences</h3>
+            <div class="bloc-xp">Techniques</div>
+            <div class="bloc-infos">Récap des compétences techniques</div>
+
+            <div class="bloc-xp">Langages</div>
+            <div class="bloc-infos">Niveau pour chaque langage</div>
+          </div>
+        </div>
+
+        <div id="dashboard-right">
+          <div class="bloc-title">Statistiques de progression</div>
+          <div class="graph-grid">
+            <div class="graph1"><h3>Progression de l'XP</h3></div>
+            <div class="graph2"><h3>XP gagnée par projet</h3></div>
+            <div class="graph3"><h3>Ratio d'audit</h3></div>
+
+            <div class="graph4"><h3>Compétences</h3></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-footer"></div>
+    </div>
 
     <footer class="is-hidden">
       <a
