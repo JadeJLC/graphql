@@ -1,5 +1,13 @@
 import { getUserDashboard } from "./getdata.js";
-import { buildLevelTable, getRankName, formatTime } from "./helpers.js";
+import {
+  buildLevelTable,
+  getRankName,
+  formatTime,
+  getSkillTotal,
+  classifySkills,
+  createSkillLogo,
+  createHTMLSkill,
+} from "./helpers.js";
 
 /**
  * Transforme la page HTML avec les données récupérées
@@ -52,9 +60,9 @@ function createProfileBloc(user) {
   const profileSection = document.getElementById("user-profile");
   const rank = getRankName(user.level[0].amount);
   const promoEvent = user.events.find((e) => e.event?.cohorts?.length > 0);
-  const promoName = user.labels[0].labelName;
-
   const signin = formatTime(promoEvent?.createdAt ?? user.createdAt);
+
+  const promoName = user.labels[0].labelName;
 
   profileSection.innerHTML = `
   <h3 class="bloc-title">Informations personnelles</h3>
@@ -114,30 +122,37 @@ function createLevelBloc(user) {
 function createSkillBloc(user) {
   const skills = getSkillTotal(user.skills);
   const keys = Object.keys(skills);
+  let techSkills = [];
+  let languages = [];
 
-  // Reste à faire : classifier les compétences entre tech et langage
-  // Créer l'élément HTML avec des jolis "logos" pour chaque compétence
-}
+  keys.forEach((key) => {
+    if (classifySkills(key)) {
+      languages.push({
+        name: key,
+        value: skills[key],
+        logo: createSkillLogo(key),
+      });
+    } else {
+      techSkills.push({
+        name: key,
+        value: skills[key],
+        logo: createSkillLogo(key),
+      });
+    }
+  });
 
-function getSkillTotal(skillList) {
-  const seen = new Set();
+  const skillBloc = document.getElementById("user-skills");
 
-  const skillLevel = skillList
-    .filter((skill) => {
-      if (seen.has(skill.object.name)) return false;
-      seen.add(skill.object.name);
-      return true;
-    })
-    .reduce((acc, skill) => {
-      skill.type = skill.type.replace("skill_", "");
-      if (!acc[skill.type] || skill.amount > acc[skill.type]) {
-        acc[skill.type] = skill.amount;
-      }
-      return acc;
-    }, {});
+  const techSkillBloc = createHTMLSkill(techSkills);
+  const langSkillBloc = createHTMLSkill(languages);
 
-  console.log(skillLevel);
-  console.log(keys);
+  skillBloc.innerHTML = `<h3 class="bloc-title">Compétences</h3>
+            <div class="bloc-xp">Techniques</div>
+            <div class="bloc-infos">${techSkillBloc}</div>
+
+            <div class="bloc-xp">Langages et environnements</div>
+            <div class="bloc-infos lang">${langSkillBloc}</div>
+          </div>`;
 }
 
 /**

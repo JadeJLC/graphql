@@ -8,7 +8,7 @@
   --pacific-cyan: #4992a0ff;
   --space-indigo: #33304aff;
   --violet: rgba(216, 145, 228, 0.795);
-  --ink-black: #0f1825ff;
+  --semi-blue: rgba(223, 246, 255, 0.747);
 
   --border-shine: #d6f1f8b9;
   --form-back: rgba(56, 80, 111, 0.651);
@@ -46,6 +46,7 @@ header {
   padding: 20px 2%;
   color: var(--pale-sky);
   font-family: var(--font-tech-ui);
+  z-index: 10;
 }
 
 #logout-btn {
@@ -275,7 +276,7 @@ header {
 .dashboard-bloc {
   color: white;
   margin-top: 100px;
-  width: 100vw;
+  width: 100%;
   margin-left: -10px;
 }
 
@@ -326,6 +327,7 @@ header {
   border: 4px ridge var(--pacific-cyan);
   border-radius: 60px;
   background-color: var(--dusk-blue);
+  box-shadow: 0 0 12px var(--border-shine);
 }
 
 .dashboard-header h1 div img {
@@ -369,6 +371,7 @@ header {
   top: -38px;
   transform: translateX(-50%);
   white-space: nowrap;
+  /* box-shadow: 0 0 12px var(--border-shine); */
 }
 
 .bloc-title::before,
@@ -426,7 +429,8 @@ header {
   margin-top: -2px;
 }
 
-.progress-bar {
+.progress-bar,
+.skill-logo span {
   background-color: var(--dusk-blue);
   border: 2px double var(--blue-slate);
   margin: auto;
@@ -443,7 +447,7 @@ header {
   text-align: right;
 }
 
-.user-skills {
+#user-skills {
   margin-bottom: 0px;
 }
 
@@ -486,6 +490,59 @@ header {
 }
 .graph4 {
   grid-area: 2 / 2 / 3 / 3;
+}
+
+#user-skills .bloc-infos {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.skill-bloc {
+  display: flex;
+  flex-direction: column;
+  margin: 5px 10px;
+  text-align: center;
+  font-family: var(--font-title);
+}
+
+.skill-logo {
+  padding: 5px;
+  border: 3px ridge var(--violet);
+  border-radius: 5px;
+  background-color: var(--dusk-blue);
+  text-transform: uppercase;
+  margin-bottom: 3px;
+  position: relative;
+  cursor: context-menu;
+}
+
+.lang .skill-logo {
+  border-color: var(--semi-blue);
+}
+
+.skill-logo span {
+  max-height: 0px;
+  overflow: hidden;
+  border-radius: 5px;
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--dusk-blue);
+  white-space: nowrap;
+  border-width: 0px;
+  transition:
+    bottom ease-in-out 0.3s,
+    max-height ease-in 0.3s;
+}
+
+.skill-logo:hover span {
+  bottom: 115%;
+  max-height: 50px;
+  padding: 2px;
+  z-index: 2;
+  border-width: 2px;
 }
 
 /* #endregion ***** Tableau de bord */

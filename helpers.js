@@ -78,6 +78,30 @@ function formatTime(dateString) {
 }
 
 /**
+ * Récupère le nombre de points par compétences
+ * @param {object} skillList Les compétences récupérées dans l'API
+ */
+function getSkillTotal(skillList) {
+  const seen = new Set();
+
+  const skillLevel = skillList
+    .filter((skill) => {
+      if (seen.has(skill.object.name)) return false;
+      seen.add(skill.object.name);
+      return true;
+    })
+    .reduce((acc, skill) => {
+      skill.type = skill.type.replace("skill_", "");
+      if (!acc[skill.type] || skill.amount > acc[skill.type]) {
+        acc[skill.type] = skill.amount;
+      }
+      return acc;
+    }, {});
+
+  return skillLevel;
+}
+
+/**
  * Classifie les compétences entre "Technique" et "Langages" comme sur l'intra
  * @param {string} skillName Le nom de la compétence
  * @returns true si c'est un langage de programmation, false si c'est une technique
@@ -113,4 +137,53 @@ function classifySkills(skillName) {
   return false;
 }
 
-export { buildLevelTable, getRankName, formatTime };
+function createSkillLogo(skillName) {
+  let skillShort = skillName;
+  if (skillName.includes("-")) {
+    const dividedSkill = skillName.split("-");
+    const initials = dividedSkill[0][0] + dividedSkill[1][0];
+    skillShort = initials;
+  } else if (skillName.length >= 4) {
+    skillShort = skillName[0] + skillName[1] + skillName[2];
+  }
+
+  const skillFullName = getSkillFullName(skillName);
+
+  const skillLogo = `<div class="skill-logo" alt="${skillName}" title="${skillName}">${skillShort} <span>${skillFullName}</span></div>`;
+  console.log(skillLogo);
+  return skillLogo;
+}
+
+function getSkillFullName(skillName) {
+  const fullSkills = {
+    prog: "Bases de programmation",
+    algo: "Algorithmique",
+    stats: "Statistiques",
+    ai: "IA",
+    js: "Javascript",
+  };
+
+  if (fullSkills[skillName]) {
+    return fullSkills[skillName];
+  }
+  return skillName;
+}
+
+function createHTMLSkill(skillList) {
+  let HTMLskill = "";
+  skillList.forEach((skill) => {
+    HTMLskill += `<div class="skill-bloc">${skill.logo} <div class="skill-value">${skill.value}%</div></div>`;
+  });
+
+  return HTMLskill;
+}
+
+export {
+  buildLevelTable,
+  getRankName,
+  formatTime,
+  getSkillTotal,
+  classifySkills,
+  createSkillLogo,
+  createHTMLSkill,
+};
