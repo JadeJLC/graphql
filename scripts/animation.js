@@ -55,4 +55,39 @@ function getPathData(percent, startPercent, radius, cx, cy) {
   return `M ${cx} ${cy} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
 }
 
-export { animatePieChart };
+function animateXPGraph(svgEl) {
+  const line = svgEl.querySelector("polyline");
+  const area = svgEl.querySelector("path");
+
+  // --- Ligne ---
+  const length = line.getTotalLength();
+  line.style.strokeDasharray = length;
+  line.style.strokeDashoffset = length;
+
+  // --- Aire : clip-path ---
+  const svgNS = "http://www.w3.org/2000/svg";
+  const clipId = "xp-reveal-clip";
+  const fullWidth = svgEl.viewBox.baseVal.width || svgEl.clientWidth;
+
+  const clipPath = document.createElementNS(svgNS, "clipPath");
+  clipPath.setAttribute("id", clipId);
+
+  const rect = document.createElementNS(svgNS, "rect");
+  rect.setAttribute("y", "0");
+  rect.setAttribute("height", "100%");
+  rect.style.width = "0px";
+
+  clipPath.appendChild(rect);
+  svgEl.querySelector("defs").appendChild(clipPath);
+  area.setAttribute("clip-path", `url(#${clipId})`);
+
+  // --- Force le reflow AVANT de déclencher l'animation ---
+  void line.getBoundingClientRect();
+
+  line.style.transition = "stroke-dashoffset 1.5s ease-in-out";
+  rect.style.transition = "width 1.5s ease-in-out";
+  line.style.strokeDashoffset = "0";
+  rect.style.width = `${fullWidth}px`;
+}
+
+export { animatePieChart, animateXPGraph };

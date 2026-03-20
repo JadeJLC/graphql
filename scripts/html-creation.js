@@ -8,8 +8,9 @@ import {
   createSkillLogo,
   createHTMLSkill,
   createSVGPieChart,
+  createSVGLineChart,
 } from "./helpers.js";
-import { animatePieChart } from "./animation.js";
+import { animateXPGraph } from "./animation.js";
 
 /**
  * Transforme la page HTML avec les données récupérées
@@ -51,6 +52,7 @@ function createProfilePage(user) {
   createLevelBloc(user);
   createSkillBloc(user);
   createAuditRatioBloc(user);
+  createXPProgressBloc(user);
 
   lucide.createIcons();
 }
@@ -165,6 +167,11 @@ function createSkillBloc(user) {
           </div>`;
 }
 
+/**
+ * Génère le bloc contenant le graphique de ratio d'audit
+ * @param {GraphQL data} user  Les données de l'utilisateur
+ * @returns
+ */
 function createAuditRatioBloc(user) {
   const ratio = {
     given: user.totalUp + user.totalUpBonus,
@@ -185,6 +192,48 @@ function createAuditRatioBloc(user) {
 
   const totalRatio = ratio.received > 0 ? ratio.given / ratio.received : 0;
   ratioTitle.innerHTML = `Ratio d'audit (${totalRatio.toFixed(2)})`;
+}
+
+function createXPProgressBloc(user) {
+  let currentXP = 0;
+  const transactions = user.progress.map((xp) => ({
+    date: xp.createdAt,
+    xp: (currentXP += xp.amount),
+    project: xp.object?.name ?? "—",
+    projectxp: xp.amount,
+  }));
+
+  createSVGLineChart(transactions);
+
+  const svgEl = document.getElementById("xp-graph");
+  if (!svgEl || !transactions.length) return;
+
+  const { svg, points } = createSVGLineChart(transactions);
+  svgEl.innerHTML = svg;
+
+  animateXPGraph(svgEl);
+  setTimeout(() => {
+    svgEl.querySelectorAll(".xp-dot-vis").forEach((dot) => {
+      dot.style.opacity = "0.8";
+    });
+  }, 1500);
+
+  const details = document.getElementById("xp-details");
+
+  svgEl.querySelectorAll(".xp-dot").forEach((dot, i) => {
+    const { name, xp, projectxp } = points[i];
+
+    dot.addEventListener("mouseenter", () => {
+      dot.previousElementSibling.setAttribute("opacity", "1");
+      if (details)
+        details.textContent = `${name} — ${projectxp.toLocaleString("fr-FR")} xp`;
+    });
+
+    dot.addEventListener("mouseleave", () => {
+      dot.previousElementSibling.setAttribute("opacity", ".8");
+      if (details) details.textContent = "Survolez un projet pour les détails";
+    });
+  });
 }
 
 /**

@@ -70,6 +70,22 @@ async function getUserInfo(jwtoken) {
       amount
     }
 
+    progress : transactions (
+    where: {
+    type: {_like: "%xp%"},
+    path: { _like: "%div-01%", _nlike: "%piscine%/%" }
+    }
+    ) {
+    createdAt
+    amount
+      object  {
+        createdAt
+        name
+        type
+        attrs
+      }
+    }
+
     skills: transactions (
     where: {
     type: {_like: "%skill%"}

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GraphQL</title>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script type="module" src="init.js"></script>
+    <script type="module" src="/scripts/init.js"></script>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -78,14 +78,16 @@
           <div class="graph-grid">
             <div class="graph1">
               <h3>Progression de l'XP</h3>
-              <svg class="graph">
-                <g class="grid x-grid">
-                  <line x1="90" x2="90" y1="5" y2="371"></line>
-                </g>
-                <g class="grid y-grid">
-                  <line x1="90" x2="705" y1="370" y2="370"></line>
-                </g>
-              </svg>
+              <span id="xp-details" class="subtitle"
+                >Survolez un projet pour les détails</span
+              >
+              <div>
+                <svg
+                  id="xp-graph"
+                  viewBox="0 0 800 400"
+                  preserveAspectRatio="xMidYMid meet"
+                ></svg>
+              </div>
             </div>
             <div class="graph2"><h3>XP gagnée par projet</h3></div>
             <div class="graph3">
@@ -95,7 +97,7 @@
                 <svg
                   id="ratio-chart"
                   viewBox="0 0 100 100"
-                  preserveAspectRatio="xMidYMid meet"
+                  preserveAspectRatio="xMidYMid"
                 ></svg>
                 <span id="given-xp"></span>
               </div>

@@ -303,7 +303,7 @@ header {
 
 /* #endregion ***** Formulaire de connexion */
 
-/* #region ***** Tableau de bord */
+/* #region ***** Tableau de bord - Général */
 .dashboard-bloc {
   color: white;
   margin-top: 80px;
@@ -316,6 +316,7 @@ header {
   min-height: 100px;
 }
 
+/* Données de formation (titre du tableau de bord) */
 .dashboard-header h1 {
   border: 3px ridge var(--pacific-cyan);
   background-color: var(--form-back);
@@ -324,19 +325,6 @@ header {
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
   flex-shrink: 0;
-}
-
-.dashboard-header h1,
-.dashboard-header h2,
-.graph-grid h3 {
-  height: 30px;
-  line-height: 35px;
-  font-family: var(--font-title);
-  font-size: 1.1em;
-  text-shadow: 3px 2px 3px rgba(0, 0, 0, 0.2);
-  color: var(--pale-sky);
-  padding: 10px 25px 10px 120px;
-  margin: 0px;
 }
 
 .dashboard-header h1::after {
@@ -367,6 +355,20 @@ header {
   margin-top: 5%;
 }
 
+/* Nom de l'utilisateur connecté */
+.dashboard-header h1,
+.dashboard-header h2,
+.graph-grid h3 {
+  height: 30px;
+  line-height: 35px;
+  font-family: var(--font-title);
+  font-size: 1.1em;
+  text-shadow: 3px 2px 3px rgba(0, 0, 0, 0.2);
+  color: var(--pale-sky);
+  padding: 10px 25px 10px 120px;
+  margin: 0px;
+}
+
 .dashboard-body {
   display: flex;
   width: 95vw;
@@ -374,6 +376,9 @@ header {
   justify-content: space-evenly;
 }
 
+/* #endregion ***** Tableau de bord - Général */
+
+/* #region ***** Tableau de bord - Section utilisateur */
 #dashboard-left {
   display: flex;
   flex-direction: column;
@@ -391,6 +396,7 @@ header {
   border-radius: 10px;
 }
 
+/* Titre des sections (Infos personnelles, expériences, xp, statistiques) */
 .bloc-title {
   padding: 5px;
   font-size: 0.8em;
@@ -402,7 +408,6 @@ header {
   top: -38px;
   transform: translateX(-50%);
   white-space: nowrap;
-  /* box-shadow: 0 0 12px var(--border-shine); */
 }
 
 .bloc-title::before,
@@ -411,6 +416,19 @@ header {
   background-color: var(--pacific-cyan);
 }
 
+.bloc-infos {
+  font-size: 0.7em;
+  font-family: var(--font-clean-body);
+  margin-bottom: 5px;
+}
+
+.bloc-infos svg {
+  height: 18px;
+  float: left;
+  margin-top: -2px;
+}
+
+/* Section - Informations personnelles */
 #user-profile img {
   width: 22%;
   border: 4px ridge var(--pacific-cyan);
@@ -439,6 +457,7 @@ header {
   font-weight: 600;
 }
 
+/* Section - Expérience */
 .bloc-xp {
   text-align: center;
 }
@@ -448,20 +467,9 @@ header {
   letter-spacing: 0.1em;
 }
 
-.bloc-infos {
-  font-size: 0.7em;
-  font-family: var(--font-clean-body);
-  margin-bottom: 5px;
-}
-
-.bloc-infos svg {
-  height: 18px;
-  float: left;
-  margin-top: -2px;
-}
-
 .progress-bar,
-.skill-logo span {
+.skill-logo span,
+#xp-details {
   background-color: var(--dusk-blue);
   border: 2px double var(--blue-slate);
   margin: auto;
@@ -480,6 +488,7 @@ header {
   text-align: right;
 }
 
+/* Section - Compétences */
 #user-skills {
   margin-bottom: 0px;
   padding-bottom: 5px;
@@ -538,10 +547,9 @@ header {
   border-width: 2px;
 }
 
-/* #endregion ***** Tableau de bord */
+/* #endregion ***** Tableau de bord - Section utilisateur */
 
-/* #region ***** Graphiques */
-
+/* #region ***** Tableau de bord -  Graphiques */
 #dashboard-right {
   width: 65%;
   margin-left: 2%;
@@ -551,13 +559,14 @@ header {
   top: -20px;
 }
 
+/* Grille des graphiques et placement */
 .graph-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(2, 1fr);
   grid-column-gap: 10px;
   grid-row-gap: 10px;
   height: 100%;
+  grid-template-rows: auto auto;
 }
 
 .graph-grid > div {
@@ -590,6 +599,8 @@ header {
   width: 40%;
   margin: auto;
 }
+
+/* Graphique - Ratio d'audit */
 #ratio-chart {
   width: 100%;
   height: auto;
@@ -649,4 +660,42 @@ header {
   display: initial;
 }
 
-/* #endregion ***** Graphiques */
+.graph3 svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Graphique de la progression de l'xp avec le temps */
+.xp-dot {
+  cursor: context-menu;
+}
+
+.xp-dot-vis {
+  transition: all 0.5s ease;
+}
+
+#xp-details {
+  width: fit-content;
+  padding: 2px 10px;
+  text-align: center;
+}
+.graph1 > div {
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  box-sizing: border-box;
+  margin-top: -40px;
+}
+
+#xp-graph {
+  width: 100%;
+  height: 100%;
+  overflow: visible; /* Keeps labels from being cut off at the bottom */
+}
+
+#xp-graph text {
+  fill: var(--pale-sky);
+  font-size: 14px; /* Larger text for the taller layout */
+  user-select: none;
+}
+/* #endregion ***** Tableau de bord -  Graphiques */
