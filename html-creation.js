@@ -9,6 +9,7 @@ import {
   createHTMLSkill,
   createSVGPieChart,
 } from "./helpers.js";
+import { animatePieChart } from "./animation.js";
 
 /**
  * Transforme la page HTML avec les données récupérées
@@ -49,7 +50,7 @@ function createProfilePage(user) {
   createProfileBloc(user);
   createLevelBloc(user);
   createSkillBloc(user);
-  createAuditRatioPieChart(user);
+  createAuditRatioBloc(user);
 
   lucide.createIcons();
 }
@@ -93,28 +94,35 @@ function createProfileBloc(user) {
 function createLevelBloc(user) {
   const levelSection = document.getElementById("user-exp");
   const currentXP = user.xp.aggregate.sum.amount;
-  const currentLevel = user.level[0].amount;
+  const currentLvl = user.level[0].amount;
 
-  const jn = buildLevelTable();
+  const xpData = buildLevelTable();
 
-  const currentEntry = jn[currentLevel];
-  const prevEntry = jn[currentLevel - 1];
+  const currentEntry = xpData[currentLvl];
+  const prevEntry = xpData[currentLvl - 1];
 
-  const xpToNext = (jn[currentLevel].cumul - currentXP).toLocaleString("fr-FR");
+  const xpToNext = (xpData[currentLvl].cumul - currentXP).toLocaleString(
+    "fr-FR",
+  );
   const xpIntoLevel = currentXP - prevEntry.cumul;
   const progress = (xpIntoLevel / currentEntry.total) * 100;
 
   levelSection.innerHTML = `
             <h3 class="bloc-title">Expérience (XP)</h3>
-            <div class="bloc-xp">Niveau actuel : ${currentLevel}</div>
+            <div class="bloc-xp">Niveau actuel : ${currentLvl}</div>
             <div class="bloc-infos">
               <div class="progress-bar">
-                <div style="width: ${progress}%"></div>
+                <div></div>
               </div>
               <span class="subtitle">${currentXP.toLocaleString("fr-FR")} / ${currentEntry.cumul.toLocaleString("fr-FR")} xp</span>
             </div>
             <div class="bloc-infos next-level">Prochain niveau dans ${xpToNext.toLocaleString("fr-FR")} xp</div>
           `;
+
+  setTimeout(() => {
+    const progressBarInner = document.querySelector(".progress-bar > div");
+    progressBarInner.style.width = `${progress}%`;
+  }, 50);
 }
 
 /**
@@ -157,84 +165,26 @@ function createSkillBloc(user) {
           </div>`;
 }
 
-function createAuditRatioPieChart(user) {
+function createAuditRatioBloc(user) {
   const ratio = {
     given: user.totalUp + user.totalUpBonus,
     received: user.totalDown,
+    total: user.totalUp + user.totalUpBonus + user.totalDown,
   };
 
-  const total = ratio.given + ratio.received;
-  if (total === 0) return;
+  if (ratio.total == 0) return;
 
-  const ratioChart = document.getElementById("ratio-chart");
-  ratioChart.innerHTML = "";
+  createSVGPieChart(ratio);
 
-  const slices = [
-    {
-      className: "audit-given",
-      value: ratio.given,
-      color: "var(--violet)",
-      labelId: "given-xp",
-    },
-    {
-      className: "audit-received",
-      value: ratio.received,
-      color: "var(--pale-sky)",
-      labelId: "received-xp",
-    },
-  ];
+  const receivedZone = document.getElementById("received-xp");
+  const givenZone = document.getElementById("given-xp");
+  const ratioTitle = document.getElementById("ratio-count");
 
-  let currentStartPercent = 0;
-  const radius = 45;
-  const cx = 50;
-  const cy = 50;
+  receivedZone.innerHTML = `XP reçue<br/> <span>${ratio.received.toLocaleString("fr-FR")}</span>`;
+  givenZone.innerHTML = `XP donnée<br/> <span>${ratio.given.toLocaleString("fr-FR")}</span>`;
 
-  slices.forEach((slice) => {
-    const element = document.createElementNS(
-      "http://www.w3.org/2000/svg",
-      "path",
-    );
-    const percent = (slice.value / total) * 100;
-    const pathData = createSVGPieChart(
-      percent,
-      currentStartPercent,
-      radius,
-      cx,
-      cy,
-    );
-
-    element.setAttribute("d", pathData);
-    element.setAttribute("fill", slice.color);
-    element.classList.add(slice.className);
-    element.setAttribute("stroke", "var(--border-shine)");
-    element.setAttribute("stroke-width", "0.8");
-
-    // LINKING LOGIC: Find the span by ID
-    const label = document.getElementById(slice.labelId);
-
-    element.addEventListener("mouseenter", () => {
-      label.classList.add("active");
-      ratioChart.appendChild(element); // Keep hovered slice on top
-    });
-
-    element.addEventListener("mouseleave", () => {
-      label.classList.remove("active");
-    });
-
-    currentStartPercent += percent;
-    ratioChart.appendChild(element);
-  });
-
-  // Your existing title updates
-  const givenTitle = document.getElementById("given-xp");
-  const receivedTitle = document.getElementById("received-xp");
-
-  receivedTitle.innerHTML = `XP reçue<br/> <span>${ratio.received.toLocaleString("fr-FR")} </span>`;
-  givenTitle.innerHTML = `XP donnée<br/> <span>${ratio.given.toLocaleString("fr-FR")} </span>`;
-
-  const totalRatio = ratio.given / ratio.received;
-  const ratioZone = document.getElementById("ratio-count");
-  ratioZone.innerHTML = `Ratio d'audit (${Math.round(totalRatio * 100) / 100})`;
+  const totalRatio = ratio.received > 0 ? ratio.given / ratio.received : 0;
+  ratioTitle.innerHTML = `Ratio d'audit (${totalRatio.toFixed(2)})`;
 }
 
 /**

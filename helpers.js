@@ -1,30 +1,32 @@
+import { animatePieChart } from "./animation.js";
+
 /**
- * Calcule l'xp nécessaire pour passer au prochain niveau (le code volé dans le js de l'intra)
+ * Calcule l'xp nécessaire pour passer au prochain niveau (#le code volé dans le js de l'intra)
  * @returns {array} Les différents niveaux d'xp correspondant à chaque niveau
  */
 function buildLevelTable() {
-  const Ue = 128;
-  const jn = Array(Ue + 1);
-  let Cr = -1,
-    Xl = 0,
-    Kl = 0;
+  const maxLvl = 128;
+  const data = Array(maxLvl + 1);
+  let level = -1,
+    allMult = 0,
+    cumul = 0;
 
-  for (; ++Cr < Ue + 1; ) {
-    const e = Cr * 0.66 + 1;
-    const t = (Cr + 2) * 150 + 50;
-    const r = Math.round(e * t);
-    Kl += r;
-    Xl += e;
-    jn[Cr] = {
-      level: Cr,
-      base: t,
-      cumul: Kl,
-      total: r,
-      xpIndex: Math.floor(Xl),
+  for (; ++level < maxLvl + 1; ) {
+    const multiplier = level * 0.66 + 1;
+    const base = (level + 2) * 150 + 50;
+    const total = Math.round(multiplier * base);
+    cumul += total;
+    allMult += multiplier;
+    data[level] = {
+      level: level,
+      base: base,
+      cumul: cumul,
+      total: total,
+      xpIndex: Math.floor(allMult),
     };
   }
 
-  return jn;
+  return data;
 }
 
 /**
@@ -137,6 +139,11 @@ function classifySkills(skillName) {
   return false;
 }
 
+/**
+ * Fabrique une icône pour une compétence (cadre, infobulle, nom raccourci)
+ * @param {string} skillName Le nom de la compétence
+ * @returns
+ */
 function createSkillLogo(skillName) {
   let skillShort = skillName;
   if (skillName.includes("-")) {
@@ -153,6 +160,11 @@ function createSkillLogo(skillName) {
   return skillLogo;
 }
 
+/**
+ * Fournit le nom complet (en français) des compétences pour remplacer le raccourci de l'APi
+ * @param {string} skillName Le nom de la compétence
+ * @returns
+ */
 function getSkillFullName(skillName) {
   const fullSkills = {
     prog: "Bases de programmation",
@@ -168,6 +180,11 @@ function getSkillFullName(skillName) {
   return skillName;
 }
 
+/**
+ * Crée les balises HTML pour toutes les compétences d'une catégorie
+ * @param {object} skillList La liste des compétences et de leur valeur skill{name, value, logo}
+ * @returns
+ */
 function createHTMLSkill(skillList) {
   let HTMLskill = "";
   skillList.forEach((skill) => {
@@ -177,21 +194,61 @@ function createHTMLSkill(skillList) {
   return HTMLskill;
 }
 
-function createSVGPieChart(percent, startPercent, radius, cx, cy) {
-  if (percent <= 0) return "";
-  if (percent >= 100) percent = 99.99;
+/**
+ * Fabrique le graphique en SVG à partir des données du ratio
+ * @param {object} ratio Ratio d'audit via l'xp donnée et reçue ratio{given, received, total}
+ * @returns
+ */
+function createSVGPieChart(ratio) {
+  const ratioChart = document.getElementById("ratio-chart");
+  ratioChart.innerHTML = "";
 
-  const startAngle = (startPercent * 3.6 - 90) * (Math.PI / 180);
-  const endAngle = ((startPercent + percent) * 3.6 - 90) * (Math.PI / 180);
+  const slices = [
+    {
+      id: "given-xp",
+      className: "audit-given",
+      value: ratio.given,
+      color: "var(--violet)",
+    },
+    {
+      id: "received-xp",
+      className: "audit-received",
+      value: ratio.received,
+      color: "var(--pale-sky)",
+    },
+  ];
 
-  const x1 = cx + radius * Math.cos(startAngle);
-  const y1 = cy + radius * Math.sin(startAngle);
-  const x2 = cx + radius * Math.cos(endAngle);
-  const y2 = cy + radius * Math.sin(endAngle);
+  let currentStartPercent = 0;
+  const radius = 45;
+  const cx = 50;
+  const cy = 50;
 
-  const largeArcFlag = percent > 50 ? 1 : 0;
+  slices.forEach((slice) => {
+    const percent = (slice.value / ratio.total) * 100;
+    const element = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "path",
+    );
 
-  return `M ${cx} ${cy} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
+    element.setAttribute("fill", slice.color);
+    element.classList.add(slice.className);
+    element.setAttribute("stroke", "var(--border-shine)");
+    element.setAttribute("stroke-width", "0.8");
+
+    const label = document.getElementById(slice.id);
+    element.addEventListener("mouseenter", () => {
+      label.classList.add("active");
+      ratioChart.appendChild(element);
+    });
+    element.addEventListener("mouseleave", () =>
+      label.classList.remove("active"),
+    );
+
+    animatePieChart(element, percent, currentStartPercent, radius, cx, cy);
+
+    ratioChart.appendChild(element);
+    currentStartPercent += percent;
+  });
 }
 
 export {

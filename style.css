@@ -29,6 +29,35 @@
 }
 /* #endregion ***** Définition des variables  */
 
+/* #region ***** Sélection et scroll */
+::-moz-selection {
+  background-color: var(--violet);
+  color: var(--dusk-blue);
+}
+
+::selection {
+  background-color: var(--violet);
+  color: var(--dusk-blue);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--blue-slate);
+  border: 3px solid var(--dusk-blue);
+  border-top: 1px solid lightgrey;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--blue-slate);
+  border: 2px solid var(--dusk-blue);
+  border-radius: 2px;
+}
+/* #endregion ***** Sélection et scroll */
+
 /* #region ***** Fond de page et header */
 body {
   background-image: url("background.jpg");
@@ -442,6 +471,8 @@ header {
 .progress-bar div {
   height: 20px;
   background: var(--degrade);
+  width: 0%;
+  transition: width 1s linear;
 }
 
 .next-level {
@@ -593,15 +624,15 @@ header {
 }
 
 #received-xp {
-  bottom: 20%;
+  top: 70%;
   left: 10%;
   color: var(--pale-sky);
 }
 
 #given-xp {
   position: absolute;
-  top: 25%;
-  right: 10%;
+  top: 20%;
+  right: 7%;
   color: var(--violet);
   filter: brightness(1.1);
 }
