@@ -51,6 +51,9 @@ async function getUserInfo(jwtoken) {
     lastName
     avatarUrl
     createdAt
+    totalDown
+    totalUp
+    totalUpBonus
 
     labels {
     labelName

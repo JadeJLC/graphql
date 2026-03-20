@@ -39,7 +39,8 @@ body {
 
 header {
   width: 96%;
-  background-color: var(--form-back);
+  background-color: var(--dusk-blue);
+  opacity: 0.9;
   position: fixed;
   top: 0px;
   left: 0px;
@@ -52,6 +53,7 @@ header {
 #logout-btn {
   float: right;
   cursor: pointer;
+  margin-top: -4px;
 }
 
 #logout-btn svg {
@@ -275,7 +277,7 @@ header {
 /* #region ***** Tableau de bord */
 .dashboard-bloc {
   color: white;
-  margin-top: 100px;
+  margin-top: 80px;
   width: 100%;
   margin-left: -10px;
 }
@@ -449,47 +451,7 @@ header {
 
 #user-skills {
   margin-bottom: 0px;
-}
-
-#dashboard-right {
-  width: 65%;
-  margin-left: 2%;
-}
-
-#dashboard-right .bloc-title {
-  top: -20px;
-}
-
-.graph-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  grid-column-gap: 10px;
-  grid-row-gap: 10px;
-  height: 100%;
-}
-
-.graph-grid div {
-  background-color: rebeccapurple;
-  padding: 10px;
-}
-
-.graph-grid h3 {
-  text-align: center;
-  padding: initial;
-}
-
-.graph1 {
-  grid-area: 1 / 1 / 2 / 2;
-}
-.graph2 {
-  grid-area: 1 / 2 / 2 / 3;
-}
-.graph3 {
-  grid-area: 2 / 1 / 3 / 2;
-}
-.graph4 {
-  grid-area: 2 / 2 / 3 / 3;
+  padding-bottom: 5px;
 }
 
 #user-skills .bloc-infos {
@@ -546,3 +508,114 @@ header {
 }
 
 /* #endregion ***** Tableau de bord */
+
+/* #region ***** Graphiques */
+
+#dashboard-right {
+  width: 65%;
+  margin-left: 2%;
+}
+
+#dashboard-right .bloc-title {
+  top: -20px;
+}
+
+.graph-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  grid-column-gap: 10px;
+  grid-row-gap: 10px;
+  height: 100%;
+}
+
+.graph-grid > div {
+  padding: 10px;
+  border-radius: 20px;
+  box-shadow: 0 0 5px var(--border-shine);
+}
+
+.graph-grid h3 {
+  text-align: center;
+  padding: initial;
+  margin-bottom: 10px;
+}
+
+.graph1 {
+  grid-area: 1 / 1 / 2 / 2;
+}
+.graph2 {
+  grid-area: 1 / 2 / 2 / 3;
+}
+.graph3 {
+  grid-area: 2 / 1 / 3 / 2;
+  position: relative;
+}
+.graph4 {
+  grid-area: 2 / 2 / 3 / 3;
+}
+
+.graph3 div {
+  width: 40%;
+  margin: auto;
+}
+#ratio-chart {
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+}
+
+#ratio-chart path {
+  filter: drop-shadow(0 0 2px var(--border-shine))
+    drop-shadow(0 0 2px var(--form-back)) brightness(1.1);
+  opacity: 0.75;
+}
+
+.audit-received:hover {
+  transform: scale(1.03) translateX(-3%);
+}
+.audit-given:hover {
+  transform: scale(1.03) translateX(1%);
+}
+
+#received-xp,
+#given-xp {
+  position: absolute;
+  text-shadow: 3px 2px 3px rgba(0, 0, 0, 0.2);
+  font-family: var(--font-tech-ui);
+  text-align: center;
+}
+
+#received-xp span,
+#given-xp span {
+  font-size: 0.7em;
+  display: none;
+}
+
+#received-xp {
+  bottom: 20%;
+  left: 10%;
+  color: var(--pale-sky);
+}
+
+#given-xp {
+  position: absolute;
+  top: 25%;
+  right: 10%;
+  color: var(--violet);
+  filter: brightness(1.1);
+}
+
+#received-xp.active,
+#given-xp.active {
+  transform: scale(1.15);
+  filter: brightness(1.4) drop-shadow(0 0 5px var(--border-shine));
+  z-index: 10;
+}
+
+#received-xp.active span,
+#given-xp.active span {
+  display: initial;
+}
+
+/* #endregion ***** Graphiques */

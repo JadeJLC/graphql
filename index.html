@@ -60,9 +60,9 @@
       <div class="dashboard-header">
         <h1>
           <div><img src="favicon.ico" alt="Logo" /></div>
-          Données de formations
+          Données de formation
         </h1>
-        <h2 id="header-username">Utilisateur connecté : Nom test (pseudo)</h2>
+        <h2 id="header-username"></h2>
       </div>
 
       <div class="dashboard-body">
@@ -76,9 +76,30 @@
         <div id="dashboard-right">
           <div class="bloc-title">Statistiques de progression</div>
           <div class="graph-grid">
-            <div class="graph1"><h3>Progression de l'XP</h3></div>
+            <div class="graph1">
+              <h3>Progression de l'XP</h3>
+              <svg class="graph">
+                <g class="grid x-grid">
+                  <line x1="90" x2="90" y1="5" y2="371"></line>
+                </g>
+                <g class="grid y-grid">
+                  <line x1="90" x2="705" y1="370" y2="370"></line>
+                </g>
+              </svg>
+            </div>
             <div class="graph2"><h3>XP gagnée par projet</h3></div>
-            <div class="graph3"><h3>Ratio d'audit</h3></div>
+            <div class="graph3">
+              <h3 id="ratio-count">Ratio d'audit</h3>
+              <div>
+                <span id="received-xp"></span>
+                <svg
+                  id="ratio-chart"
+                  viewBox="0 0 100 100"
+                  preserveAspectRatio="xMidYMid meet"
+                ></svg>
+                <span id="given-xp"></span>
+              </div>
+            </div>
 
             <div class="graph4"><h3>Compétences</h3></div>
           </div>

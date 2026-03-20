@@ -150,7 +150,6 @@ function createSkillLogo(skillName) {
   const skillFullName = getSkillFullName(skillName);
 
   const skillLogo = `<div class="skill-logo" alt="${skillName}" title="${skillName}">${skillShort} <span>${skillFullName}</span></div>`;
-  console.log(skillLogo);
   return skillLogo;
 }
 
@@ -178,6 +177,23 @@ function createHTMLSkill(skillList) {
   return HTMLskill;
 }
 
+function createSVGPieChart(percent, startPercent, radius, cx, cy) {
+  if (percent <= 0) return "";
+  if (percent >= 100) percent = 99.99;
+
+  const startAngle = (startPercent * 3.6 - 90) * (Math.PI / 180);
+  const endAngle = ((startPercent + percent) * 3.6 - 90) * (Math.PI / 180);
+
+  const x1 = cx + radius * Math.cos(startAngle);
+  const y1 = cy + radius * Math.sin(startAngle);
+  const x2 = cx + radius * Math.cos(endAngle);
+  const y2 = cy + radius * Math.sin(endAngle);
+
+  const largeArcFlag = percent > 50 ? 1 : 0;
+
+  return `M ${cx} ${cy} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
+}
+
 export {
   buildLevelTable,
   getRankName,
@@ -186,4 +202,5 @@ export {
   classifySkills,
   createSkillLogo,
   createHTMLSkill,
+  createSVGPieChart,
 };

@@ -7,6 +7,7 @@ import {
   classifySkills,
   createSkillLogo,
   createHTMLSkill,
+  createSVGPieChart,
 } from "./helpers.js";
 
 /**
@@ -48,6 +49,7 @@ function createProfilePage(user) {
   createProfileBloc(user);
   createLevelBloc(user);
   createSkillBloc(user);
+  createAuditRatioPieChart(user);
 
   lucide.createIcons();
 }
@@ -153,6 +155,86 @@ function createSkillBloc(user) {
             <div class="bloc-xp">Langages et environnements</div>
             <div class="bloc-infos lang">${langSkillBloc}</div>
           </div>`;
+}
+
+function createAuditRatioPieChart(user) {
+  const ratio = {
+    given: user.totalUp + user.totalUpBonus,
+    received: user.totalDown,
+  };
+
+  const total = ratio.given + ratio.received;
+  if (total === 0) return;
+
+  const ratioChart = document.getElementById("ratio-chart");
+  ratioChart.innerHTML = "";
+
+  const slices = [
+    {
+      className: "audit-given",
+      value: ratio.given,
+      color: "var(--violet)",
+      labelId: "given-xp",
+    },
+    {
+      className: "audit-received",
+      value: ratio.received,
+      color: "var(--pale-sky)",
+      labelId: "received-xp",
+    },
+  ];
+
+  let currentStartPercent = 0;
+  const radius = 45;
+  const cx = 50;
+  const cy = 50;
+
+  slices.forEach((slice) => {
+    const element = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "path",
+    );
+    const percent = (slice.value / total) * 100;
+    const pathData = createSVGPieChart(
+      percent,
+      currentStartPercent,
+      radius,
+      cx,
+      cy,
+    );
+
+    element.setAttribute("d", pathData);
+    element.setAttribute("fill", slice.color);
+    element.classList.add(slice.className);
+    element.setAttribute("stroke", "var(--border-shine)");
+    element.setAttribute("stroke-width", "0.8");
+
+    // LINKING LOGIC: Find the span by ID
+    const label = document.getElementById(slice.labelId);
+
+    element.addEventListener("mouseenter", () => {
+      label.classList.add("active");
+      ratioChart.appendChild(element); // Keep hovered slice on top
+    });
+
+    element.addEventListener("mouseleave", () => {
+      label.classList.remove("active");
+    });
+
+    currentStartPercent += percent;
+    ratioChart.appendChild(element);
+  });
+
+  // Your existing title updates
+  const givenTitle = document.getElementById("given-xp");
+  const receivedTitle = document.getElementById("received-xp");
+
+  receivedTitle.innerHTML = `XP reçue<br/> <span>${ratio.received.toLocaleString("fr-FR")} </span>`;
+  givenTitle.innerHTML = `XP donnée<br/> <span>${ratio.given.toLocaleString("fr-FR")} </span>`;
+
+  const totalRatio = ratio.given / ratio.received;
+  const ratioZone = document.getElementById("ratio-count");
+  ratioZone.innerHTML = `Ratio d'audit (${Math.round(totalRatio * 100) / 100})`;
 }
 
 /**
