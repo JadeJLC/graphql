@@ -469,18 +469,26 @@ header {
 
 .progress-bar,
 .skill-logo span,
-#xp-details {
+.details {
   background-color: var(--dusk-blue);
   border: 2px double var(--blue-slate);
   margin: auto;
   height: 20px;
+  transition: height 0.3s ease-in;
 }
 
 .progress-bar div {
   height: 20px;
   background: var(--degrade);
   width: 0%;
-  transition: width 1s linear;
+  transition:
+    width 1s linear,
+    height 0.3s ease-in;
+}
+
+.progress-bar:hover,
+.progress-bar:hover div {
+  height: 25px;
 }
 
 .next-level {
@@ -523,7 +531,9 @@ header {
   border-color: var(--semi-blue);
 }
 
-.skill-logo span {
+.skill-logo span,
+.treemap-sub span,
+.treemap-standalone span {
   max-height: 0px;
   overflow: hidden;
   border-radius: 5px;
@@ -589,18 +599,21 @@ header {
 }
 .graph3 {
   grid-area: 2 / 1 / 3 / 2;
-  position: relative;
 }
 .graph4 {
   grid-area: 2 / 2 / 3 / 3;
 }
 
-.graph3 div {
+.audit {
+  position: relative;
+}
+
+/* Graphique - Ratio d'audit */
+#audit-graph {
   width: 40%;
   margin: auto;
 }
 
-/* Graphique - Ratio d'audit */
 #ratio-chart {
   width: 100%;
   height: auto;
@@ -611,6 +624,7 @@ header {
   filter: drop-shadow(0 0 2px var(--border-shine))
     drop-shadow(0 0 2px var(--form-back)) brightness(1.1);
   opacity: 0.75;
+  cursor: context-menu;
 }
 
 .audit-received:hover {
@@ -660,7 +674,7 @@ header {
   display: initial;
 }
 
-.graph3 svg {
+#audit-graph svg {
   display: block;
   width: 100%;
   height: auto;
@@ -675,7 +689,7 @@ header {
   transition: all 0.5s ease;
 }
 
-#xp-details {
+.details {
   width: fit-content;
   padding: 2px 10px;
   text-align: center;
@@ -699,3 +713,138 @@ header {
   user-select: none;
 }
 /* #endregion ***** Tableau de bord -  Graphiques */
+
+/* #region ***** Treemap - XP par projet */
+
+#projects-graph {
+  width: 100%;
+  display: grid;
+  grid-auto-flow: dense;
+  grid-template-columns: repeat(24, 1fr);
+  /* grid-auto-rows: minmax(20px, auto); */
+  gap: 3px;
+}
+
+.treemap-group,
+.treemap-standalone,
+.treemap-sub {
+  position: relative;
+}
+
+.treemap-group,
+.treemap-standalone {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  flex-basis: 0;
+  gap: 2px;
+  padding: 10px 2px 2px;
+  position: relative;
+
+  /* Couleur à définir via nth-child ou data-group en CSS */
+  background-color: var(--treemap-group-bg, var(--dusk-blue));
+  border-radius: 4px;
+}
+
+/* Label du groupe en haut */
+.treemap-group > b:first-child,
+.treemap-standalone > b {
+  display: none;
+}
+
+.treemap-group::before,
+.treemap-standalone::before {
+  content: attr(title);
+  position: relative;
+  top: -5px;
+  left: 5px;
+  font-size: 11px;
+  font-family: var(--font-tech-ui);
+  font-weight: 700;
+  overflow: hidden;
+  white-space: pre;
+  max-width: calc(100% - 10px);
+  pointer-events: none;
+  text-align: center;
+  -webkit-line-clamp: 2; /* number of lines to show */
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+}
+
+.treemap-group,
+.treemap-standalone {
+  /* background-color: var(--dusk-blue); */
+  border: 2px double var(--blue-slate);
+}
+
+.treemap-sub,
+.treemap-standalone,
+.treemap-group {
+  cursor: context-menu;
+}
+
+.treemap-sub,
+.treemap-standalone {
+  flex-basis: 0;
+  min-width: 45px;
+  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  transition: filter 0.15s ease;
+}
+
+.treemap-sub {
+  background-color: var(--blue-slate);
+  padding: 4px 5px;
+}
+
+.treemap-sub:hover,
+.treemap-standalone:hover {
+  filter: brightness(1.15) !important;
+  z-index: 1;
+}
+
+.treemap-sub b {
+  font-size: 10px;
+  font-family: var(--font-tech-ui);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  text-align: center;
+}
+
+.treemap-sub small,
+.treemap-standalone small {
+  font-size: 0.4em;
+  font-family: var(--font-clean-body);
+  display: block;
+  text-align: center;
+}
+
+#prj-details {
+  margin-bottom: 5px;
+}
+
+@keyframes tileEntrance {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(10px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+}
+
+.animating-tile {
+  opacity: 0;
+  animation: tileEntrance 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  will-change: transform, opacity;
+}
+/* #endregion ***** Treemap - XP par projet */

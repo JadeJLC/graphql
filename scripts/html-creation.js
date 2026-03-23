@@ -7,9 +7,13 @@ import {
   classifySkills,
   createSkillLogo,
   createHTMLSkill,
-  createSVGPieChart,
-  createSVGLineChart,
+  buildProjectData,
 } from "./helpers.js";
+import {
+  createSVGLineChart,
+  createSVGPieChart,
+  createTreeMap,
+} from "./buildgraph.js";
 import { animateXPGraph } from "./animation.js";
 
 /**
@@ -53,6 +57,7 @@ function createProfilePage(user) {
   createSkillBloc(user);
   createAuditRatioBloc(user);
   createXPProgressBloc(user);
+  createProjectXPBloc(user);
 
   lucide.createIcons();
 }
@@ -187,8 +192,8 @@ function createAuditRatioBloc(user) {
   const givenZone = document.getElementById("given-xp");
   const ratioTitle = document.getElementById("ratio-count");
 
-  receivedZone.innerHTML = `XP reçue<br/> <span>${ratio.received.toLocaleString("fr-FR")}</span>`;
-  givenZone.innerHTML = `XP donnée<br/> <span>${ratio.given.toLocaleString("fr-FR")}</span>`;
+  receivedZone.innerHTML = `Points reçus<br/> <span>${ratio.received.toLocaleString("fr-FR")}</span>`;
+  givenZone.innerHTML = `Points donnés<br/> <span>${ratio.given.toLocaleString("fr-FR")}</span>`;
 
   const totalRatio = ratio.received > 0 ? ratio.given / ratio.received : 0;
   ratioTitle.innerHTML = `Ratio d'audit (${totalRatio.toFixed(2)})`;
@@ -202,8 +207,6 @@ function createXPProgressBloc(user) {
     project: xp.object?.name ?? "—",
     projectxp: xp.amount,
   }));
-
-  createSVGLineChart(transactions);
 
   const svgEl = document.getElementById("xp-graph");
   if (!svgEl || !transactions.length) return;
@@ -224,16 +227,28 @@ function createXPProgressBloc(user) {
     const { name, xp, projectxp } = points[i];
 
     dot.addEventListener("mouseenter", () => {
-      dot.previousElementSibling.setAttribute("opacity", "1");
       if (details)
         details.textContent = `${name} — ${projectxp.toLocaleString("fr-FR")} xp`;
     });
 
     dot.addEventListener("mouseleave", () => {
-      dot.previousElementSibling.setAttribute("opacity", ".8");
       if (details) details.textContent = "Survolez un projet pour les détails";
     });
   });
+}
+
+function createProjectXPBloc(user) {
+  const projectList = user.progress;
+  let organizedProjects = [];
+
+  projectList.forEach((project) => {
+    const classifiedProjet = buildProjectData(project);
+    if (classifiedProjet) organizedProjects.push(classifiedProjet);
+  });
+
+  createTreeMap(organizedProjects, user.xp.aggregate.sum.amount);
+
+  // createSVGTreemap("projects-graph", allProjects);
 }
 
 /**

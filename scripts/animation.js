@@ -84,10 +84,26 @@ function animateXPGraph(svgEl) {
   // --- Force le reflow AVANT de déclencher l'animation ---
   void line.getBoundingClientRect();
 
-  line.style.transition = "stroke-dashoffset 1.5s ease-in-out";
-  rect.style.transition = "width 1.5s ease-in-out";
+  line.style.transition = "stroke-dashoffset 1.6s ease-in-out";
+  rect.style.transition = "width 1.6s ease-in-out";
   line.style.strokeDashoffset = "0";
   rect.style.width = `${fullWidth}px`;
 }
 
-export { animatePieChart, animateXPGraph };
+function animateTreeMap(tiles) {
+  const totalDuration = 1.5; // Total time in seconds
+  const stagger = totalDuration / tiles.length;
+
+  tiles.forEach((tile, i) => {
+    // 1. Set initial state to hidden
+    tile.style.opacity = "0";
+
+    // 2. Add the animation class
+    tile.classList.add("animating-tile");
+
+    // 3. Apply calculated delay
+    tile.style.animationDelay = `${i * stagger}s`;
+  });
+}
+
+export { animatePieChart, animateXPGraph, animateTreeMap };

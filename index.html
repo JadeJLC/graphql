@@ -76,23 +76,19 @@
         <div id="dashboard-right">
           <div class="bloc-title">Statistiques de progression</div>
           <div class="graph-grid">
-            <div class="graph1">
-              <h3>Progression de l'XP</h3>
-              <span id="xp-details" class="subtitle"
+            <div class="graph4"><h3>Collaboration</h3></div>
+
+            <div class="graph3">
+              <h3>XP gagnée par projet</h3>
+              <span id="prj-details" class="subtitle details"
                 >Survolez un projet pour les détails</span
               >
-              <div>
-                <svg
-                  id="xp-graph"
-                  viewBox="0 0 800 400"
-                  preserveAspectRatio="xMidYMid meet"
-                ></svg>
-              </div>
+              <div id="projects-graph"></div>
             </div>
-            <div class="graph2"><h3>XP gagnée par projet</h3></div>
-            <div class="graph3">
+
+            <div class="graph2 audit">
               <h3 id="ratio-count">Ratio d'audit</h3>
-              <div>
+              <div id="audit-graph">
                 <span id="received-xp"></span>
                 <svg
                   id="ratio-chart"
@@ -103,7 +99,19 @@
               </div>
             </div>
 
-            <div class="graph4"><h3>Compétences</h3></div>
+            <div class="graph1">
+              <h3>Progression de l'XP</h3>
+              <span id="xp-details" class="subtitle details"
+                >Survolez un projet pour les détails</span
+              >
+              <div>
+                <svg
+                  id="xp-graph"
+                  viewBox="0 0 800 400"
+                  preserveAspectRatio="xMidYMid meet"
+                ></svg>
+              </div>
+            </div>
           </div>
         </div>
       </div>

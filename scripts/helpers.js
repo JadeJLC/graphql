@@ -1,5 +1,3 @@
-import { animatePieChart } from "./animation.js";
-
 /**
  * Calcule l'xp nécessaire pour passer au prochain niveau (#le code volé dans le js de l'intra)
  * @returns {array} Les différents niveaux d'xp correspondant à chaque niveau
@@ -191,63 +189,6 @@ function createHTMLSkill(skillList) {
 }
 
 /**
- * Fabrique le graphique en SVG à partir des données du ratio
- * @param {object} ratio Ratio d'audit via l'xp donnée et reçue ratio{given, received, total}
- * @returns
- */
-function createSVGPieChart(ratio) {
-  const ratioChart = document.getElementById("ratio-chart");
-  ratioChart.innerHTML = "";
-
-  const slices = [
-    {
-      id: "given-xp",
-      className: "audit-given",
-      value: ratio.given,
-      color: "var(--violet)",
-    },
-    {
-      id: "received-xp",
-      className: "audit-received",
-      value: ratio.received,
-      color: "var(--pale-sky)",
-    },
-  ];
-
-  let currentStartPercent = 0;
-  const radius = 45;
-  const cx = 50;
-  const cy = 50;
-
-  slices.forEach((slice) => {
-    const percent = (slice.value / ratio.total) * 100;
-    const element = document.createElementNS(
-      "http://www.w3.org/2000/svg",
-      "path",
-    );
-
-    element.setAttribute("fill", slice.color);
-    element.classList.add(slice.className);
-    element.setAttribute("stroke", "var(--border-shine)");
-    element.setAttribute("stroke-width", "0.8");
-
-    const label = document.getElementById(slice.id);
-    element.addEventListener("mouseenter", () => {
-      label.classList.add("active");
-      ratioChart.appendChild(element);
-    });
-    element.addEventListener("mouseleave", () =>
-      label.classList.remove("active"),
-    );
-
-    animatePieChart(element, percent, currentStartPercent, radius, cx, cy);
-
-    ratioChart.appendChild(element);
-    currentStartPercent += percent;
-  });
-}
-
-/**
  * Crée une liste de trimestres dynamique entre le premier gain d'xp et la date du jour
  * @param {GraphQL data} transactions La liste des gains d'xp
  * @returns {array} Une liste de trimestres pour séparer le graphique en périodes
@@ -256,7 +197,7 @@ function buildQuarters(transactions) {
   const now = new Date();
   const firstDate = new Date(transactions[0].date);
 
-  const MONTHS_FR = [
+  const monthList = [
     "Jan",
     "Fév",
     "Mars",
@@ -281,9 +222,12 @@ function buildQuarters(transactions) {
     const start = quarters.length === 0 ? firstDate : new Date(cursor);
     const end = nextCursor > now ? now : nextCursor;
 
-    const endLabelMonth =
+    let endLabelMonth =
       end >= nextCursor ? nextCursor.getMonth() - 1 : end.getMonth();
-    const label = `${MONTHS_FR[start.getMonth()]}–${MONTHS_FR[endLabelMonth]} ${start.getFullYear()}`;
+
+    if (endLabelMonth < 0 || endLabelMonth > 11) endLabelMonth = 11;
+
+    const label = `${monthList[start.getMonth()]}–${monthList[endLabelMonth]} ${start.getFullYear()}`;
 
     quarters.push({ label, start, end });
     cursor = nextCursor;
@@ -293,87 +237,339 @@ function buildQuarters(transactions) {
 }
 
 /**
- * Fonction pour créer le graphique SVG de l'évolution de l'xp au fil du temps
- * @param {GraphQL data} transactions La liste des gains d'xp
+ * Construit chaque projet sous la forme d'un objet exploitable pour le graph treemap
+ * @param {object} data Les données brutes du projet à trier
+ * @returns {object} {name : Nom du projet, category : main, sub ou standalone, xp : nombre d'xp accordés, date : fin du projet}
+ */
+function buildProjectData(data) {
+  if (data.object.type != "project") return;
+
+  const project = {
+    originalName: data.object.name,
+    name: data.object.name,
+    category: getProjectCategory(data.object.name) ?? "stand-alone",
+    xp: data.amount,
+    date: formatTime(data.createdAt),
+  };
+
+  if (project.category.includes("sub-project")) {
+    let projectData = project.category.split("(");
+    let parent = projectData[1];
+    parent = parent.replace(")", "");
+
+    project.name = project.name.replace(parent, "");
+  }
+
+  project.name = project.name.replace(/-/g, " ").trim();
+
+  return project;
+}
+
+/**
+ * Vérifie si le projet est un sous-projet, un projet principal ou un stand-alone
+ * @param {string} projectName Nom du projet
+ * @returns {string} main-project pour les projets ayant des sous-projets, sub-project pour les sous-projects, standalone pour les projets simples
+ */
+function getProjectCategory(projectName) {
+  const projectHierarchy = {
+    "ascii-art": [
+      "ascii-art-color",
+      "ascii-art-output",
+      "ascii-art-fs",
+      "ascii-art-justify",
+      "ascii-art-reverse",
+    ],
+    "ascii-art-web": [
+      "ascii-art-web-stylize",
+      "ascii-art-web-dockerize",
+      "ascii-art-web-export-file",
+    ],
+    "groupie-tracker": [
+      "groupie-tracker-filters",
+      "groupie-tracker-geolocalization",
+      "groupie-tracker-visualizations",
+      "groupie-tracker-search-bar",
+    ],
+    forum: [
+      "forum-authentication",
+      "forum-image-upload",
+      "forum-security",
+      "forum-moderation",
+      "forum-advanced-features",
+    ],
+    "make-your-game": [
+      "make-your-game-score-handling",
+      "make-your-game-history",
+      "make-your-game-different-maps",
+    ],
+    "real-time-forum": ["real-time-forum-typing-in-progress"],
+    "0-shell": ["0-shell-job-control", "0-shell-scripting"],
+    standalone: [
+      "checkpoint",
+      "checkpoint-go",
+      "go-reloaded",
+      "lem-in",
+      "git",
+      "tetris-optimizer",
+      "atm-management-system",
+      "push-swap",
+      "my-ls-1",
+      "net-cat",
+      "linux",
+      "login",
+      "add-vm",
+      "connect",
+      "remote",
+      "scan",
+      "graphql",
+      "social-network",
+      "mini-framework",
+      "bomberman-dom",
+      "a-table",
+      "get-a-room",
+      "lets-do-some-sports",
+      "lets-fair-trade",
+      "stock-exchange-sim",
+      "mister-quiz",
+      "shop",
+      "netfix",
+      "smart-road",
+      "filler",
+      "rt",
+      "localhost",
+      "multiplayer-fps",
+      "wget",
+      "system-monitor",
+      "zappy",
+      "corewar",
+      "make-your-own",
+      "math-skills",
+      "guess-it-1",
+      "linear-stats",
+      "guess-it-2",
+      "lets-play",
+      "angul-it",
+      "buy-01",
+      "mr-jenk",
+      "safe-zone",
+      "buy-02",
+      "nexus",
+      "neo-4-flix",
+      "travel-plan",
+      "lets-travel",
+      "firing-range",
+      "widget-factory",
+      "army-of-one",
+      "zombie-ai",
+      "nascar-online-alpha",
+      "mouse-vr",
+      "the-pages",
+      "stealth-boom",
+      "jumpo",
+      "vehicle-physics",
+      "twenty-forty-eight",
+      "sky-map",
+      "chess",
+      "kaquiz",
+      "stock-market",
+      "secure-messenger",
+      "passive",
+      "inspector-image",
+      "active",
+      "local",
+      "web-hack",
+      "injector",
+      "hole-in-bin",
+      "mal-track",
+      "evasion",
+      "obfuscator",
+      "malware",
+      "nft-marketplace",
+      "payment-channel",
+      "node-dashboard",
+      "financial-instruments",
+      "deep-in-net",
+      "deep-in-system",
+      "crud-master",
+      "play-with-containers",
+      "orchestrator",
+      "cloud-design",
+      "code-keeper",
+      "kaggle-titanic",
+      "nlp-scraper",
+      "emotions-detector",
+      "sp500-strategies",
+      "credit-scoring",
+      "computer-science",
+      "developer-certifications",
+      "networking",
+      "cloud-foundations",
+      "cloud-fundamentals",
+      "cybercloud-basics",
+      "green-it-ready",
+      "eco-audit",
+      "green-stack",
+      "sustainable-devops",
+      "eco-project",
+      "green-fix",
+      "green-mission",
+    ],
+  };
+
+  const keys = Object.keys(projectHierarchy);
+
+  if (keys.includes(projectName)) return "main-project";
+
+  if (projectHierarchy.standalone.includes(projectName)) return "stand-alone";
+
+  for (const [parent, children] of Object.entries(projectHierarchy)) {
+    if (parent !== "standalone" && children.includes(projectName)) {
+      return `sub-project (${parent})`;
+    }
+  }
+
+  return "stand-alone";
+}
+
+/**
+ * Fabrique la tile du treemap pour un projet
+ * @param {string} name Nom du projet
+ * @param {int} xp Quantité d'xp apportée
+ * @param {string} type Standalone, Main ou Subproject
  * @returns
  */
-function createSVGLineChart(transactions) {
-  const [ML, MT, W, H] = [70, 20, 710, 330];
+function buildTreemapTile(name, xp, type, ogname) {
+  const el = document.createElement("div");
+  el.className = `treemap-${type}`;
+  el.title = `${ogname ? ogname : name}\n${xp.toLocaleString("fr-FR")} XP`;
 
-  const quarters = buildQuarters(transactions);
-  const timeStart = quarters[0].start.getTime();
-  const timeEnd = quarters.at(-1).end.getTime();
-  const MAX = Math.ceil(transactions.at(-1).xp / 10_000) * 10_000;
+  el.innerHTML = `<b>${name}</b>${type == "group" || type == "standalone" ? "" : `<small>${xp.toLocaleString("fr-FR")} XP</small>`}`;
 
-  const sx = (date) =>
-    ML + ((new Date(date).getTime() - timeStart) / (timeEnd - timeStart)) * W;
-  const sy = (xp) => MT + H - (xp / MAX) * H;
+  const details = document.getElementById("prj-details");
 
-  const points = transactions.map(({ date, xp, projectxp, project }) => ({
-    x: sx(date),
-    y: sy(xp),
-    xp,
-    projectxp,
-    name: project,
-  }));
+  el.addEventListener("mouseenter", () => {
+    if (details)
+      details.textContent = `${type == "group" ? `${name} (complet)` : `${ogname ? `${ogname} (base)` : name}`} — ${xp.toLocaleString("fr-FR")} xp`;
+  });
 
-  const ptStr = points.map(({ x, y }) => `${x},${y}`).join(" ");
-  const areaStr = `M${points[0].x},${MT + H} ${ptStr} L${points.at(-1).x},${MT + H}Z`;
+  el.addEventListener("mouseleave", () => {
+    if (details) details.textContent = "Survolez un projet pour les détails";
+  });
+  return el;
+}
 
-  const yLabels = Array.from({ length: 5 }, (_, i) => {
-    const y = MT + i * (H / 4),
-      val = MAX - i * (MAX / 4);
-    return `
-      <line x1="${ML}" y1="${y}" x2="${ML + W}" y2="${y}" stroke="white" stroke-width=".5" opacity=".15"/>
-      <text x="${ML - 10}" y="${y + 5}" text-anchor="end">${val >= 1000 ? val / 1000 + "k" : val}</text>`;
-  }).join("");
+// function buildPalette() {
+//   const root = getComputedStyle(document.documentElement);
+//   const vars = ["--dusk-blue", "--blue-slate", "--pale-sky", "--pacific-cyan"];
 
-  const xLabels = quarters
-    .map(({ label, start, end }) => {
-      const xMid = sx(new Date((start.getTime() + end.getTime()) / 2));
-      const xLine = sx(start);
-      return `
-      <line x1="${xLine}" y1="${MT}" x2="${xLine}" y2="${MT + H}" stroke="white" stroke-width=".5" opacity=".2" stroke-dasharray="4,4"/>
-      <text x="${xMid}" y="${MT + H + 25}" text-anchor="middle" font-size="11">${label}</text>`;
-    })
-    .join("");
+//   return vars
+//     .map((name) => hexToHsl(root.getPropertyValue(name).trim()))
+//     .flatMap(({ h, s, l }) => [
+//       { h, s, l }, // couleur de base
+//       {
+//         h,
+//         s: Math.min(s + 10, 100),
+//         l:
+//           l > 50 // variante : +sombre ou +clair
+//             ? Math.max(l - 18, 10)
+//             : Math.min(l + 18, 90),
+//       },
+//     ]);
+// }
 
-  const dots = points
-    .map(
-      ({ x, y }) => `
-    <circle cx="${x}" cy="${y}" r="6"  fill="var(--violet)" opacity="0" pointer-events="none" class="xp-dot-vis"/>
-    <circle cx="${x}" cy="${y}" r="12" fill="transparent"  class="xp-dot"/>
-  `,
-    )
-    .join("");
+function hexToHsl(hex) {
+  const n = parseInt(hex.replace("#", "").slice(0, 6), 16);
+  const r = ((n >> 16) & 255) / 255;
+  const g = ((n >> 8) & 255) / 255;
+  const b = (n & 255) / 255;
+
+  const max = Math.max(r, g, b),
+    min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  let h = 0,
+    s = 0;
+
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h /= 6;
+  }
 
   return {
-    points,
-    svg: `
-      <defs>
-        <linearGradient id="xp-fill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stop-color="var(--violet)"   stop-opacity=".6"/>
-          <stop offset="100%" stop-color="var(--pale-sky)"  stop-opacity=".05"/>
-        </linearGradient>
-      </defs>
+    h: Math.round(h * 360),
+    s: Math.round(s * 100),
+    l: Math.round(l * 100),
+  };
+}
 
-      <g stroke="white" stroke-width="1.5" opacity=".8">
-        <line x1="${ML}" y1="${MT}"     x2="${ML}"        y2="${MT + H}"/>
-        <line x1="${ML}" y1="${MT + H}" x2="${ML + W}"    y2="${MT + H}"/>
-      </g>
+function areAdjacent(a, b, tolerance = 3) {
+  // Bumped to 3 for sub-pixel safety
+  // Do they overlap horizontally? (With a bit of extra margin)
+  const hOverlap = a.left < b.right + tolerance && b.left < a.right + tolerance;
 
-      <g fill="var(--pale-sky)" font-family="var(--font-tech-ui)" font-size="13">
-        ${yLabels}
-        ${xLabels}
-      </g>
+  // Do they overlap vertically? (Corrected logic)
+  const vOverlap = a.top < b.bottom + tolerance && b.top < a.bottom + tolerance;
 
-      <path d="${areaStr}" fill="url(#xp-fill)"/>
-      <polyline points="${ptStr}" fill="none" stroke="var(--violet)" stroke-width="2.5"
-                stroke-linejoin="round" style="filter:drop-shadow(0 0 5px var(--violet))"/>
-      ${dots}
+  // Are they touching on the X axis (sides)?
+  const hTouch =
+    Math.abs(a.right - b.left) <= tolerance ||
+    Math.abs(b.right - a.left) <= tolerance;
 
-      
-    `,
+  // Are they touching on the Y axis (top/bottom)?
+  const vTouch =
+    Math.abs(a.bottom - b.top) <= tolerance ||
+    Math.abs(b.bottom - a.top) <= tolerance;
+
+  // They are adjacent if they touch on one axis and overlap on the other
+  return (hTouch && vOverlap) || (vTouch && hOverlap);
+}
+
+function buildPalette() {
+  const root = getComputedStyle(document.documentElement);
+  const vars = ["--dusk-blue", "--blue-slate", "--pale-sky", "--pacific-cyan"];
+
+  // Generates exactly 8 colors: [Blue1, Blue1-Variant, Blue2, Blue2-Variant, etc.]
+  return vars
+    .map((name) => {
+      const val = root.getPropertyValue(name).trim();
+      return hexToHsl(val || "#38506f");
+    })
+    .flatMap(({ h, s, l }) => [
+      { h, s, l }, // Base
+      {
+        h,
+        s: Math.min(s + 10, 100),
+        l: l > 50 ? Math.max(l - 18, 10) : Math.min(l + 18, 90), // Variant
+      },
+    ]);
+}
+
+function createColorPalette() {
+  // We call this once to get the 8-color array
+  const palette = buildPalette();
+
+  return function (index, isSub = false, subIndex = 0) {
+    // Safety: modulo ensures we never hit an undefined index
+    const base = palette[index % palette.length];
+    let { h, s, l } = { ...base };
+
+    if (isSub) {
+      // Sub-blocks get a subtle shift so they don't look identical to the parent
+      const shift = (subIndex + 1) * 4;
+      l = l > 50 ? l - shift : l + shift;
+      s = Math.min(s + 5, 100);
+    }
+
+    const borderL = l > 50 ? Math.min(l + 8, 100) : Math.max(l - 8, 0);
+
+    return {
+      bg: `hsl(${h}, ${s}%, ${l}%)`,
+      border: `hsl(${h}, ${s}%, ${borderL}%)`,
+      isLight: l > 50,
+    };
   };
 }
 
@@ -385,6 +581,10 @@ export {
   classifySkills,
   createSkillLogo,
   createHTMLSkill,
-  createSVGPieChart,
-  createSVGLineChart,
+  buildQuarters,
+  buildProjectData,
+  buildTreemapTile,
+  areAdjacent,
+  createColorPalette,
+  buildPalette,
 };
