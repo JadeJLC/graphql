@@ -8,6 +8,7 @@ import {
   createSkillLogo,
   createHTMLSkill,
   buildProjectData,
+  formatProjectName,
 } from "./helpers.js";
 import {
   createSVGLineChart,
@@ -24,7 +25,6 @@ import { animateXPGraph } from "./animation.js";
 async function createPage(response, jwtoken) {
   console.log("User Data : ", response);
   if (response === "logout") {
-    createProfilePage();
     displayLoginPage();
     return;
   }
@@ -204,7 +204,7 @@ function createXPProgressBloc(user) {
   const transactions = user.progress.map((xp) => ({
     date: xp.createdAt,
     xp: (currentXP += xp.amount),
-    project: xp.object?.name ?? "—",
+    project: xp.object?.name ?? "",
     projectxp: xp.amount,
   }));
 
@@ -224,15 +224,19 @@ function createXPProgressBloc(user) {
   const details = document.getElementById("xp-details");
 
   svgEl.querySelectorAll(".xp-dot").forEach((dot, i) => {
-    const { name, xp, projectxp } = points[i];
+    const { date, name, projectxp } = points[i];
 
     dot.addEventListener("mouseenter", () => {
-      if (details)
-        details.textContent = `${name} — ${projectxp.toLocaleString("fr-FR")} xp`;
+      let project = formatProjectName({ name: name });
+      if (details) {
+        details.textContent = `${date} :  ${projectxp.toLocaleString("fr-FR")} xp (${project.name})`;
+      }
     });
 
     dot.addEventListener("mouseleave", () => {
-      if (details) details.textContent = "Survolez un projet pour les détails";
+      if (details) {
+        details.textContent = "Survolez une date pour les détails";
+      }
     });
   });
 }
@@ -247,8 +251,6 @@ function createProjectXPBloc(user) {
   });
 
   createTreeMap(organizedProjects, user.xp.aggregate.sum.amount);
-
-  // createSVGTreemap("projects-graph", allProjects);
 }
 
 /**

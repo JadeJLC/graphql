@@ -829,6 +829,10 @@ header {
   margin-bottom: 5px;
 }
 
+.capitalize {
+  text-transform: capitalize;
+}
+
 @keyframes tileEntrance {
   from {
     opacity: 0;

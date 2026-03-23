@@ -4,6 +4,7 @@ import {
   createColorPalette,
   buildPalette,
   areAdjacent,
+  formatTime,
 } from "./helpers.js";
 import { animatePieChart, animateTreeMap } from "./animation.js";
 
@@ -30,6 +31,7 @@ function createSVGLineChart(transactions) {
     y: sy(xp),
     xp,
     projectxp,
+    date: formatTime(date),
     name: project,
   }));
 

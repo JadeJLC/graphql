@@ -244,13 +244,22 @@ function buildQuarters(transactions) {
 function buildProjectData(data) {
   if (data.object.type != "project") return;
 
-  const project = {
+  let project = {
     originalName: data.object.name,
     name: data.object.name,
     category: getProjectCategory(data.object.name) ?? "stand-alone",
     xp: data.amount,
     date: formatTime(data.createdAt),
   };
+
+  project = formatProjectName(project);
+
+  return project;
+}
+
+function formatProjectName(project) {
+  if (!project.category)
+    project.category = getProjectCategory(project.name) ?? "stand-alone";
 
   if (project.category.includes("sub-project")) {
     let projectData = project.category.split("(");
@@ -264,7 +273,6 @@ function buildProjectData(data) {
 
   return project;
 }
-
 /**
  * Vérifie si le projet est un sous-projet, un projet principal ou un stand-alone
  * @param {string} projectName Nom du projet
@@ -450,32 +458,15 @@ function buildTreemapTile(name, xp, type, ogname) {
   el.addEventListener("mouseenter", () => {
     if (details)
       details.textContent = `${type == "group" ? `${name} (complet)` : `${ogname ? `${ogname} (base)` : name}`} — ${xp.toLocaleString("fr-FR")} xp`;
+    details.classList.add("capitalize");
   });
 
   el.addEventListener("mouseleave", () => {
     if (details) details.textContent = "Survolez un projet pour les détails";
+    details.classList.remove("capitalize");
   });
   return el;
 }
-
-// function buildPalette() {
-//   const root = getComputedStyle(document.documentElement);
-//   const vars = ["--dusk-blue", "--blue-slate", "--pale-sky", "--pacific-cyan"];
-
-//   return vars
-//     .map((name) => hexToHsl(root.getPropertyValue(name).trim()))
-//     .flatMap(({ h, s, l }) => [
-//       { h, s, l }, // couleur de base
-//       {
-//         h,
-//         s: Math.min(s + 10, 100),
-//         l:
-//           l > 50 // variante : +sombre ou +clair
-//             ? Math.max(l - 18, 10)
-//             : Math.min(l + 18, 90),
-//       },
-//     ]);
-// }
 
 function hexToHsl(hex) {
   const n = parseInt(hex.replace("#", "").slice(0, 6), 16);
@@ -506,24 +497,18 @@ function hexToHsl(hex) {
 }
 
 function areAdjacent(a, b, tolerance = 3) {
-  // Bumped to 3 for sub-pixel safety
-  // Do they overlap horizontally? (With a bit of extra margin)
   const hOverlap = a.left < b.right + tolerance && b.left < a.right + tolerance;
 
-  // Do they overlap vertically? (Corrected logic)
   const vOverlap = a.top < b.bottom + tolerance && b.top < a.bottom + tolerance;
 
-  // Are they touching on the X axis (sides)?
   const hTouch =
     Math.abs(a.right - b.left) <= tolerance ||
     Math.abs(b.right - a.left) <= tolerance;
 
-  // Are they touching on the Y axis (top/bottom)?
   const vTouch =
     Math.abs(a.bottom - b.top) <= tolerance ||
     Math.abs(b.bottom - a.top) <= tolerance;
 
-  // They are adjacent if they touch on one axis and overlap on the other
   return (hTouch && vOverlap) || (vTouch && hOverlap);
 }
 
@@ -548,16 +533,13 @@ function buildPalette() {
 }
 
 function createColorPalette() {
-  // We call this once to get the 8-color array
   const palette = buildPalette();
 
   return function (index, isSub = false, subIndex = 0) {
-    // Safety: modulo ensures we never hit an undefined index
     const base = palette[index % palette.length];
     let { h, s, l } = { ...base };
 
     if (isSub) {
-      // Sub-blocks get a subtle shift so they don't look identical to the parent
       const shift = (subIndex + 1) * 4;
       l = l > 50 ? l - shift : l + shift;
       s = Math.min(s + 5, 100);
@@ -587,4 +569,5 @@ export {
   areAdjacent,
   createColorPalette,
   buildPalette,
+  formatProjectName,
 };
