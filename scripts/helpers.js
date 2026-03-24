@@ -241,7 +241,7 @@ function buildQuarters(transactions) {
  * @param {object} data Les données brutes du projet à trier
  * @returns {object} {name : Nom du projet, category : main, sub ou standalone, xp : nombre d'xp accordés, date : fin du projet}
  */
-function buildProjectData(data) {
+function buildProjectData(data, mode, currentUser) {
   if (data.object.type != "project") return;
 
   let project = {
@@ -250,6 +250,8 @@ function buildProjectData(data) {
     category: getProjectCategory(data.object.name) ?? "stand-alone",
     xp: data.amount,
     date: formatTime(data.createdAt),
+    coworkers:
+      mode == "collab" ? filterCoworkers(data.object.results, currentUser) : "",
   };
 
   project = formatProjectName(project);
@@ -273,6 +275,30 @@ function formatProjectName(project) {
 
   return project;
 }
+
+function isSoloProject(data) {
+  if (
+    (data.attrs.groupMin == 1 && data.attrs.groupMax == 1) ||
+    data.type == "exercise" ||
+    data.type == "piscine"
+  )
+    return true;
+
+  return false;
+}
+
+function filterCoworkers(resultData, currentUser) {
+  const group = resultData[0].group;
+
+  const members = [];
+
+  group.members.forEach((member) => {
+    if (member.user.login != currentUser.login) members.push(member.user);
+  });
+
+  return members;
+}
+
 /**
  * Vérifie si le projet est un sous-projet, un projet principal ou un stand-alone
  * @param {string} projectName Nom du projet
@@ -532,7 +558,7 @@ function buildPalette() {
     ]);
 }
 
-function createColorPalette() {
+function createColorPalette(mode) {
   const palette = buildPalette();
 
   return function (index, isSub = false, subIndex = 0) {
@@ -547,12 +573,51 @@ function createColorPalette() {
 
     const borderL = l > 50 ? Math.min(l + 8, 100) : Math.max(l - 8, 0);
 
+    if (mode == "arc") {
+      l = l < 35 ? (l += 10) : l;
+    }
+
     return {
       bg: `hsl(${h}, ${s}%, ${l}%)`,
       border: `hsl(${h}, ${s}%, ${borderL}%)`,
       isLight: l > 50,
     };
   };
+}
+
+function countProjectsByCoworker(organizedProjects) {
+  const allProjects = organizedProjects.filter(
+    (p) => Array.isArray(p.coworkers) && p.coworkers.length > 0,
+  );
+
+  const map = new Map(); // keyed by login
+
+  allProjects.forEach((project) => {
+    project.coworkers.forEach((cw) => {
+      if (!cw.login) return;
+      if (!map.has(cw.login)) {
+        map.set(cw.login, {
+          login: cw.login,
+          firstName: cw.firstName || "",
+          lastName: cw.lastName || "",
+          count: 0,
+          projects: [],
+          subprojects: [],
+        });
+      }
+      const entry = map.get(cw.login);
+      entry.count++;
+
+      if (project.category.includes("sub-project")) {
+        entry.subprojects.push(project.name);
+      } else {
+        entry.projects.push(project.name);
+      }
+    });
+  });
+
+  console.log(Array.from(map.values()).sort((a, b) => b.count - a.count));
+  return Array.from(map.values()).sort((a, b) => b.count - a.count);
 }
 
 export {
@@ -570,4 +635,6 @@ export {
   createColorPalette,
   buildPalette,
   formatProjectName,
+  isSoloProject,
+  countProjectsByCoworker,
 };

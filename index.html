@@ -76,13 +76,29 @@
         <div id="dashboard-right">
           <div class="bloc-title">Statistiques de progression</div>
           <div class="graph-grid">
-            <div class="graph4"><h3>Collaboration</h3></div>
+            <div class="graph4">
+              <h3>Collaboration</h3>
+
+              <center>
+                <svg
+                  id="collab-graph"
+                  viewBox="0 0 800 400"
+                  preserveAspectRatio="xMidYMid meet"
+                ></svg>
+              </center>
+              <div style="height: 45px">
+                <span id="collab-details" class="subtitle details">
+                  Survolez un collègue pour les détails
+                </span>
+              </div>
+              <div id="collab-names"></div>
+            </div>
 
             <div class="graph3">
               <h3>XP gagnée par projet</h3>
-              <span id="prj-details" class="subtitle details"
-                >Survolez un projet pour les détails</span
-              >
+              <span id="prj-details" class="subtitle details">
+                Survolez un projet pour les détails
+              </span>
               <div id="projects-graph"></div>
             </div>
 

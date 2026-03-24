@@ -79,6 +79,7 @@ async function getUserInfo(jwtoken) {
     createdAt
     amount
       object  {
+        id
         createdAt
         name
         type
@@ -130,6 +131,27 @@ async function getUserInfo(jwtoken) {
   return await fetchFromDomain(query, {}, jwtoken);
 }
 
+async function getGroupMembers(groupIds, jwtoken) {
+  const query = `query GetGroupMembers($groupIds: [Int!]!) {
+  object(where: { id: { _in: $groupIds } }) {
+    id
+    results {
+      group {
+        members {
+          user {
+            login
+            firstName
+            lastName
+          }
+        }
+      }
+    }
+  }
+}`;
+
+  return await fetchFromDomain(query, { groupIds }, jwtoken);
+}
+
 /**
  * Formule la query pour récupérer l'xp et toutes les informations statistiques de l'utilisateur
  * @param {string} userID Identifiant de l'utilisateur dans l'API
@@ -171,4 +193,4 @@ async function getUserDashboard(userID, jwtoken) {
   console.log("Dashboard Data:", progressData);
 }
 
-export { getUserInfo, getUserDashboard };
+export { getUserInfo, getUserDashboard, getGroupMembers };

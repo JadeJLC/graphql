@@ -627,6 +627,11 @@ header {
   cursor: context-menu;
 }
 
+#ratio-chart path:hover {
+  filter: drop-shadow(0 0 2px var(--border-shine))
+    drop-shadow(0 0 2px var(--form-back)) brightness(1.2);
+}
+
 .audit-received:hover {
   transform: scale(1.03) translateX(-3%);
 }
@@ -712,9 +717,8 @@ header {
   font-size: 14px; /* Larger text for the taller layout */
   user-select: none;
 }
-/* #endregion ***** Tableau de bord -  Graphiques */
 
-/* #region ***** Treemap - XP par projet */
+/* XP par projet */
 
 #projects-graph {
   width: 100%;
@@ -851,4 +855,28 @@ header {
   animation: tileEntrance 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
   will-change: transform, opacity;
 }
-/* #endregion ***** Treemap - XP par projet */
+
+/* Projets par collègue */
+#collab-names {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.collab-cw {
+  font-family: var(--font-tech-ui);
+  font-size: 0.8em;
+  padding: 4px;
+  margin: 5px;
+  border-radius: 5px;
+  box-shadow: 3px 2px 3px rgba(0, 0, 0, 0.2);
+  cursor: context-menu;
+}
+
+#collab-details {
+  min-height: 20px;
+  height: initial;
+  max-height: 40px;
+  overflow: auto;
+}
+
+/* #endregion ***** Tableau de bord -  Graphiques */

@@ -5,8 +5,15 @@ import {
   buildPalette,
   areAdjacent,
   formatTime,
+  countProjectsByCoworker,
 } from "./helpers.js";
-import { animatePieChart, animateTreeMap } from "./animation.js";
+import {
+  animatePieChart,
+  animateRadialBars,
+  animateTreeMap,
+} from "./animation.js";
+
+const ns = "http://www.w3.org/2000/svg";
 
 /**
  * Fonction pour créer le graphique SVG de l'évolution de l'xp au fil du temps
@@ -126,10 +133,7 @@ function createSVGPieChart(ratio) {
 
   slices.forEach((slice) => {
     const percent = (slice.value / ratio.total) * 100;
-    const element = document.createElementNS(
-      "http://www.w3.org/2000/svg",
-      "path",
-    );
+    const element = document.createElementNS(ns, "path");
 
     element.setAttribute("fill", slice.color);
     element.classList.add(slice.className);
@@ -174,9 +178,7 @@ function createTreeMap(projects) {
       standalone.push({ ...p, type: "standalone", totalXP: p.xp });
   }
 
-  for (const p of projects.filter((p) =>
-    p.category?.startsWith("sub-project"),
-  )) {
+  for (const p of projects.filter((p) => p.category?.includes("sub-project"))) {
     const parentName = p.category.slice("sub-project (".length, -1);
     groupMap[parentName]?.subs.push(p);
   }
@@ -270,4 +272,155 @@ function createTreeMap(projects) {
   animateTreeMap(tiles);
 }
 
-export { createSVGLineChart, createSVGPieChart, createTreeMap };
+function createCollabCaption(coworker, colors) {
+  const captionZone = document.getElementById("collab-names");
+
+  const coworkerInfo = document.createElement("span");
+  coworkerInfo.classList.add("collab-cw");
+  coworkerInfo.id = coworker.login;
+  coworkerInfo.style.backgroundColor = colors.bg;
+  coworkerInfo.style.color = colors.isLight
+    ? "var(--dusk-blue)"
+    : "var(--border-shine)";
+  coworkerInfo.innerHTML = `${coworker.firstName} ${coworker.lastName} (${coworker.login})`;
+
+  captionZone.appendChild(coworkerInfo);
+}
+
+function createSVGRadialBarChart(organizedProjects) {
+  const svg = document.getElementById("collab-graph");
+  if (!svg) return;
+  svg.innerHTML = "";
+
+  const getColor = createColorPalette("arc");
+  const collaborators = countProjectsByCoworker(organizedProjects);
+  const details = document.getElementById("collab-details");
+
+  if (collaborators.length === 0) return;
+
+  // Make the SVG fill its container — viewBox is square so the chart is centred
+  svg.setAttribute("viewBox", "0 0 400 400");
+  svg.setAttribute("width", "70%");
+  svg.setAttribute("height", "70%");
+
+  const cx = 200;
+  const cy = 200;
+  const maxRadius = 175;
+  const minRadius = 30;
+
+  const usableRange = maxRadius - minRadius;
+  const slotSize = Math.min(28, Math.floor(usableRange / collaborators.length));
+  const ringWidth = Math.max(8, Math.floor(slotSize * 0.55));
+
+  const maxCount = collaborators[0].count;
+
+  // Arcs are collected here and passed to animate() so animation logic stays
+  // completely separate from rendering logic.
+  const arcs = [];
+
+  collaborators.forEach((collab, i) => {
+    const r = maxRadius - i * slotSize;
+    if (r < minRadius) return;
+
+    const circumference = 2 * Math.PI * r;
+    const pct = Math.min(collab.count / maxCount, 1);
+    const colorIndex = (i * 2) % 8;
+    const color = getColor(colorIndex);
+
+    // Background track
+    const track = document.createElementNS(ns, "circle");
+    track.setAttribute("cx", cx);
+    track.setAttribute("cy", cy);
+    track.setAttribute("r", r);
+    track.setAttribute("fill", "none");
+    track.setAttribute("stroke", "rgba(150,150,150,0.12)");
+    track.setAttribute("stroke-width", ringWidth);
+    svg.appendChild(track);
+
+    // Coloured arc — hidden initially, revealed by animate()
+    const arc = document.createElementNS(ns, "circle");
+    arc.setAttribute("cx", cx);
+    arc.setAttribute("cy", cy);
+    arc.setAttribute("r", r);
+    arc.setAttribute("fill", "none");
+    arc.setAttribute("stroke", color.bg);
+    arc.setAttribute("stroke-width", ringWidth);
+    arc.setAttribute("stroke-dasharray", circumference);
+    arc.setAttribute("stroke-dashoffset", circumference); // fully hidden
+    arc.setAttribute("stroke-linecap", "round");
+    arc.setAttribute("transform", `rotate(-90, ${cx}, ${cy})`);
+    arc.style.transition = `stroke-dashoffset ${0.6 + i * 0.08}s cubic-bezier(0.4, 0, 0.2, 1) ${i * 0.06}s`;
+    svg.appendChild(arc);
+
+    // Hover → populate #collab-details
+
+    createCollabCaption(collab, color);
+    const caption = document.getElementById(collab.login);
+
+    arc.addEventListener("mouseenter", () =>
+      radialHoverEffect(collab, caption, details, "hover", arc),
+    );
+
+    caption.addEventListener("mouseenter", () =>
+      radialHoverEffect(collab, caption, details, "hover", arc),
+    );
+
+    arc.addEventListener("mouseleave", () =>
+      radialHoverEffect(collab, caption, details, "off", arc),
+    );
+
+    caption.addEventListener("mouseleave", () =>
+      radialHoverEffect(collab, caption, details, "off", arc),
+    );
+
+    arcs.push({ arc, circumference, pct });
+  });
+
+  animateRadialBars(arcs);
+}
+
+function radialHoverEffect(collab, caption, details, mode, arc) {
+  const displayName = collab.firstName
+    ? `${collab.firstName}&nbsp${collab.lastName[0]}`.trim()
+    : collab.login;
+  const projectLabel =
+    collab.projects.length === 1
+      ? "1 projet"
+      : `${collab.projects.length} projets`;
+
+  const optionLabel =
+    collab.subprojects.length === 0
+      ? ""
+      : collab.subprojects.length === 1
+        ? "1 optionnel"
+        : `${collab.subprojects.length} optionnels
+    `;
+  const projectNames = collab.projects.join(", ");
+
+  switch (mode) {
+    case "hover":
+      if (details) {
+        arc.style.cursor = "context-menu";
+        details.innerHTML = `${displayName}.&nbsp-&nbsp${collab.count} (${projectLabel}, ${optionLabel})`;
+        details.classList.add("capitalize");
+
+        caption.style.filter = arc.style.filter = "brightness(1.3)";
+      }
+      return;
+
+    case "off":
+      if (details) {
+        details.innerHTML = "Survolez un collègue pour les détails";
+        details.classList.remove("capitalize");
+        caption.style.filter = arc.style.filter = "";
+      }
+      return;
+  }
+}
+
+export {
+  createSVGLineChart,
+  createSVGPieChart,
+  createTreeMap,
+  createSVGRadialBarChart,
+};

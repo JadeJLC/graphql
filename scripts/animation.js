@@ -65,14 +65,16 @@ function animateXPGraph(svgEl) {
   line.style.strokeDashoffset = length;
 
   // --- Aire : clip-path ---
-  const svgNS = "http://www.w3.org/2000/svg";
   const clipId = "xp-reveal-clip";
   const fullWidth = svgEl.viewBox.baseVal.width || svgEl.clientWidth;
 
-  const clipPath = document.createElementNS(svgNS, "clipPath");
+  const clipPath = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "clipPath",
+  );
   clipPath.setAttribute("id", clipId);
 
-  const rect = document.createElementNS(svgNS, "rect");
+  const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
   rect.setAttribute("y", "0");
   rect.setAttribute("height", "100%");
   rect.style.width = "0px";
@@ -106,4 +108,14 @@ function animateTreeMap(tiles) {
   });
 }
 
-export { animatePieChart, animateXPGraph, animateTreeMap };
+function animateRadialBars(arcs) {
+  arcs.forEach(({ arc, circumference, pct }) => {
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() =>
+        arc.setAttribute("stroke-dashoffset", circumference * (1 - pct)),
+      ),
+    );
+  });
+}
+
+export { animatePieChart, animateXPGraph, animateTreeMap, animateRadialBars };

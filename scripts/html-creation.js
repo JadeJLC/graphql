@@ -1,4 +1,4 @@
-import { getUserDashboard } from "./getdata.js";
+import { getUserDashboard, getGroupMembers } from "./getdata.js";
 import {
   buildLevelTable,
   getRankName,
@@ -9,10 +9,12 @@ import {
   createHTMLSkill,
   buildProjectData,
   formatProjectName,
+  isSoloProject,
 } from "./helpers.js";
 import {
   createSVGLineChart,
   createSVGPieChart,
+  createSVGRadialBarChart,
   createTreeMap,
 } from "./buildgraph.js";
 import { animateXPGraph } from "./animation.js";
@@ -30,10 +32,7 @@ async function createPage(response, jwtoken) {
   }
 
   const userData = response.data.user[0];
-  const userID = response.data.user[0].id;
-  createProfilePage(userData);
-
-  getUserDashboard(userID, jwtoken);
+  createProfilePage(userData, jwtoken);
 }
 
 /**
@@ -41,7 +40,7 @@ async function createPage(response, jwtoken) {
  * et dans le header
  * @param {object} user Les informations de l'utilisateur
  */
-function createProfilePage(user) {
+function createProfilePage(user, jwtoken) {
   const headername = document.getElementById("header-username");
 
   if (user) {
@@ -58,6 +57,7 @@ function createProfilePage(user) {
   createAuditRatioBloc(user);
   createXPProgressBloc(user);
   createProjectXPBloc(user);
+  createCollabBloc(user, jwtoken);
 
   lucide.createIcons();
 }
@@ -199,6 +199,11 @@ function createAuditRatioBloc(user) {
   ratioTitle.innerHTML = `Ratio d'audit (${totalRatio.toFixed(2)})`;
 }
 
+/**
+ * Génère le bloc contenant le graphique d'évolution de l'xp dans le temps
+ * @param {graphQL data} user Les données de l'utilisateur
+ * @returns
+ */
 function createXPProgressBloc(user) {
   let currentXP = 0;
   const transactions = user.progress.map((xp) => ({
@@ -241,6 +246,10 @@ function createXPProgressBloc(user) {
   });
 }
 
+/**
+ * Génère le bloc contenant le graphique d'xp gagnée par projet et le bloc contenant les données de collaboration sur les projets
+ * @param {graphQL data} user Les données de l'utilisateur
+ */
 function createProjectXPBloc(user) {
   const projectList = user.progress;
   let organizedProjects = [];
@@ -251,6 +260,44 @@ function createProjectXPBloc(user) {
   });
 
   createTreeMap(organizedProjects, user.xp.aggregate.sum.amount);
+}
+
+async function createCollabBloc(user, jwtoken) {
+  console.log("Création du graph 4");
+  const projectList = user.progress;
+  let organizedProjects = [];
+  let soloProjects = [];
+  let groupProjects = [];
+
+  projectList.forEach((project) => {
+    if (isSoloProject(project.object)) {
+      soloProjects.push(project);
+    } else {
+      groupProjects.push(project);
+    }
+  });
+
+  const groupIds = groupProjects.map((p) => p.object.id);
+  const memberData = await getGroupMembers(groupIds, jwtoken);
+
+  const membersById = Object.fromEntries(
+    memberData.data.object.map((o) => [o.id, o.results]),
+  );
+  groupProjects.forEach((p) => {
+    p.object.results = membersById[p.object.id] ?? [];
+  });
+
+  groupProjects.forEach((project) => {
+    const classifiedProjet = buildProjectData(project, "collab", user);
+    if (classifiedProjet) organizedProjects.push(classifiedProjet);
+  });
+
+  soloProjects.forEach((project) => {
+    const classifiedProjet = buildProjectData(project);
+    if (classifiedProjet) organizedProjects.push(classifiedProjet);
+  });
+
+  createSVGRadialBarChart(organizedProjects);
 }
 
 /**
