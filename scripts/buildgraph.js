@@ -247,7 +247,7 @@ function createTreeMap(projects) {
     Object.assign(tile.style, {
       backgroundColor: colors.bg,
       border: `2px double ${colors.border}`,
-      color: colors.isLight ? "var(--dusk-blue)" : "var(--border-shine)",
+      color: colors.isLight ? "var(--dusk-blue)" : "var(--pale-sky)",
     });
 
     if (item.type === "group") {

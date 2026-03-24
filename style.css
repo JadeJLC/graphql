@@ -606,6 +606,119 @@ header {
   border-width: 2px;
 }
 
+/* Section audits */
+
+.audit-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.audit-bloc {
+  max-width: 33%;
+  text-align: center;
+  border: 3px solid;
+  padding: 5px;
+  overflow: hidden;
+  max-height: 35px;
+  transition: all 0.5s ease;
+}
+
+.audit-bloc:hover {
+  max-height: 200px;
+}
+
+.audit-bloc > span {
+  display: block;
+  margin: auto;
+  font-family: var(--font-code-mono);
+  font-size: 0.7em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 95%;
+  padding: 0px 3px;
+  overflow: hidden;
+}
+
+.audit-bloc {
+  position: relative;
+}
+
+.audit-bloc svg {
+  position: absolute;
+  top: 25px;
+  right: 0px;
+  height: 15px;
+  cursor: pointer;
+}
+
+.audit-code span {
+  display: block;
+  max-height: 0px;
+  width: 100%;
+  font-size: 0.7em;
+  overflow: hidden;
+  position: absolute;
+  bottom: 10px;
+  left: 0px;
+  /* background-color: var(--violet) !important; */
+  background-color: var(--dusk-blue);
+  transition: all 0.3s ease-in;
+}
+
+.audit-code .copied-code {
+  bottom: 1px;
+  max-height: 50px;
+  transition: all 0.3s ease;
+}
+
+.audit-code {
+  background-color: var(--dusk-blue);
+  cursor: copy;
+  margin-top: 10px !important;
+  width: fit-content;
+  position: relative;
+  border-radius: 5px;
+  padding: 5px 13px;
+  border: 2px solid;
+}
+
+.audit-bloc .audit-date {
+  margin-top: 5px;
+  text-overflow: initial;
+  white-space: initial;
+  font-size: 0.5em;
+}
+
+.audit-plus {
+  font-size: 0.65em;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 90%;
+  height: 90%;
+  max-width: 0px;
+  max-height: 0px;
+  background-color: var(--blue-slate);
+  transition: all 0.5s ease-in;
+  overflow: hidden;
+}
+
+.audit-plus span {
+  display: block;
+  margin-bottom: 3px;
+  font-weight: bold;
+  text-decoration: underline;
+  font-size: 1.1em;
+}
+
+.audit-plus.show {
+  padding: 5% 5%;
+  max-width: 200px;
+  max-height: 200px;
+  cursor: zoom-out;
+}
+
 /* #endregion ***** Tableau de bord - Section utilisateur */
 
 /* #region ***** Tableau de bord -  Graphiques */
@@ -906,6 +1019,12 @@ header {
 }
 
 /* Projets par collègue */
+
+#collab-graph circle:first-child {
+  filter: drop-shadow(0 0 2px var(--border-shine))
+    drop-shadow(0 0 2px var(--form-back));
+}
+
 #collab-names {
   display: flex;
   flex-wrap: wrap;

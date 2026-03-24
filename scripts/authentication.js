@@ -44,6 +44,13 @@ async function logInSuccess(jwtoken) {
 
   if (dashbooard) {
     const userData = await getUserInfo(jwtoken);
+
+    if (userData.errors) {
+      logOut();
+      if (loading) loading.classList.add("is-hidden");
+      return;
+    }
+
     loading.classList.add("is-hidden");
     dashbooard.classList.remove("is-hidden");
 
@@ -66,7 +73,7 @@ function logInFailed() {
  * @param {HTMLElement} logoutBtn
  */
 function logOut(logoutBtn) {
-  logoutBtn.classList.add("is-hidden");
+  if (logoutBtn) logoutBtn.classList.add("is-hidden");
   createPage("logout");
 
   localStorage.removeItem("jwt");

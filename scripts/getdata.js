@@ -66,13 +66,21 @@ async function getUserInfo(jwtoken) {
           code
         }
         group {
+          object {
+            name
+            type
+          }
           members {
             user {
               login
+              firstName
+              lastName
             }
           }
           captain {
             login
+            firstName
+            lastName
           }
         }
         

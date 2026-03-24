@@ -1,3 +1,4 @@
+import { createColorPalette } from "./coloring.js";
 import { getGroupMembers } from "./getdata.js";
 
 /**
@@ -567,6 +568,59 @@ function countProjectsByCoworker(organizedProjects) {
   return Array.from(map.values()).sort((a, b) => b.count - a.count);
 }
 
+function buildAuditData(data, index) {
+  const captain = {
+    login: data.group.captain.login,
+    firstName: data.group.captain.firstName,
+    lastName: data.group.captain.lastName,
+  };
+
+  let members = [];
+
+  data.group.members.forEach((member) => {
+    members.push(member.user);
+  });
+
+  const audit = {
+    end: data.endAt,
+    code: data.private.code,
+    project: buildProjectData(data.group).name,
+    members: members,
+    captain: captain,
+  };
+
+  const getColor = createColorPalette();
+  const color = getColor(index);
+  const subColors = getColor(index, true, index + 1);
+
+  console.log(audit);
+
+  let memberList = ``;
+  audit.members.forEach((member) => {
+    if (member.login == audit.captain.login) return;
+    memberList += `${member.firstName} ${member.lastName}<br/>`;
+  });
+
+  const auditData = `<div class="audit-bloc" title="${audit.project} - ${audit.captain.login}" 
+  style="border-color:${color.border};background-color:${color.bg};color:${color.isLight ? "var(--dusk-blue)" : "var(--pale-sky)"}"
+  >
+  <span class="audit-project" style="background-color:${subColors.bg}">${audit.project}</span><i data-lucide="badge-plus"></i>
+  <span class="audit-captain" style="background-color:${subColors.bg}">${audit.captain.login} </span>
+  <span class="audit-code" style="border-color:${subColors.bg}"><span>Code<br/> copié !</span>
+  ${audit.code}  
+  </span> 
+  <span class="audit-date">Expire le<br/> ${formatTime(audit.end)}</span>
+
+  <div class="audit-plus" style="background-color:${subColors.bg}">
+  <span class="capitalize">${audit.project}</span>
+  <b>${captain.firstName} ${captain.lastName}</b>
+  <br/>${memberList}
+  </div>
+  </div>`;
+
+  return auditData;
+}
+
 export {
   buildLevelTable,
   getRankName,
@@ -582,4 +636,5 @@ export {
   isSoloProject,
   countProjectsByCoworker,
   filterProjectByType,
+  buildAuditData,
 };

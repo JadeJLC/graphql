@@ -9,6 +9,7 @@ import {
   buildProjectData,
   formatProjectName,
   filterProjectByType,
+  buildAuditData,
 } from "./helpers.js";
 import {
   createSVGLineChart,
@@ -57,6 +58,7 @@ function createProfilePage(user, jwtoken) {
   createXPProgressBloc(user);
   createProjectXPBloc(user);
   createCollabBloc(user, jwtoken);
+  createAuditListBloc(user);
 
   lucide.createIcons();
 }
@@ -275,6 +277,60 @@ async function createCollabBloc(user, jwtoken) {
   );
 
   createSVGRadialBarChart(organizedProjects);
+}
+
+function createAuditListBloc(user) {
+  let auditHTML = ``;
+  user.audits.forEach((audit, index) => {
+    auditHTML += buildAuditData(audit, index);
+  });
+
+  const auditBloc = document.getElementById("user-audits");
+
+  auditBloc.innerHTML = `<h3 class="bloc-title">Audits</h3>
+  <div class="bloc-xp">À auditer</div>
+  <div class="audit-list">${auditHTML}</div>
+  
+  <div class="bloc-xp">Mes audits</div>`;
+
+  auditBloc.addEventListener("click", (event) => {
+    const auditCode = event.target.closest(".audit-code");
+    if (auditCode) {
+      navigator.clipboard.writeText(auditCode.textContent);
+      // console.log("Code copié");
+
+      const message = auditCode.firstChild;
+
+      console.log(message.innerHTML);
+      message.style.bottom = "1px";
+      message.style.maxHeight = "50px";
+
+      setTimeout(() => {
+        message.classList.remove("copied-code");
+        message.style.bottom = "";
+        message.style.maxHeight = "";
+      }, 2000);
+    }
+
+    const zoomBtn = event.target.closest("svg");
+    if (zoomBtn) {
+      const parent = zoomBtn.closest(".audit-bloc");
+      const auditPlus = parent.querySelector(".audit-plus");
+      if (auditPlus) auditPlus.classList.add("show");
+
+      auditPlus.addEventListener(
+        "click",
+        () => {
+          auditPlus.classList.remove("show");
+        },
+        { once: true },
+      );
+
+      setTimeout(() => {
+        auditPlus.classList.remove("show");
+      }, 7000);
+    }
+  });
 }
 
 /**

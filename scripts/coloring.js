@@ -61,8 +61,7 @@ function areAdjacent(blocA, blocB, tolerance = 3) {
 }
 
 /**
- * Crée une palette de 8 couleurs, variations de celles présentes dans les variables CSS, pour les éléments multicolores
- * (Treemap et Radial Bar Chart)
+ * Crée une palette de 8 couleurs, variations de celles présentes dans les variables CSS, pour le treemap
  * @returns Une couleur au format hsl
  */
 function buildPalette() {
