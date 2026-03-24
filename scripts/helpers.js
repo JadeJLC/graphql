@@ -1,3 +1,5 @@
+import { getGroupMembers } from "./getdata.js";
+
 /**
  * Calcule l'xp nécessaire pour passer au prochain niveau (#le code volé dans le js de l'intra)
  * @returns {array} Les différents niveaux d'xp correspondant à chaque niveau
@@ -494,95 +496,40 @@ function buildTreemapTile(name, xp, type, ogname) {
   return el;
 }
 
-function hexToHsl(hex) {
-  const n = parseInt(hex.replace("#", "").slice(0, 6), 16);
-  const r = ((n >> 16) & 255) / 255;
-  const g = ((n >> 8) & 255) / 255;
-  const b = (n & 255) / 255;
+async function filterProjectByType(user, projectList, jwtoken) {
+  let organizedProjects = [];
+  let soloProjects = [];
+  let groupProjects = [];
 
-  const max = Math.max(r, g, b),
-    min = Math.min(r, g, b);
-  const l = (max + min) / 2;
-  let h = 0,
-    s = 0;
-
-  if (max !== min) {
-    const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
-    else if (max === g) h = (b - r) / d + 2;
-    else h = (r - g) / d + 4;
-    h /= 6;
-  }
-
-  return {
-    h: Math.round(h * 360),
-    s: Math.round(s * 100),
-    l: Math.round(l * 100),
-  };
-}
-
-function areAdjacent(a, b, tolerance = 3) {
-  const hOverlap = a.left < b.right + tolerance && b.left < a.right + tolerance;
-
-  const vOverlap = a.top < b.bottom + tolerance && b.top < a.bottom + tolerance;
-
-  const hTouch =
-    Math.abs(a.right - b.left) <= tolerance ||
-    Math.abs(b.right - a.left) <= tolerance;
-
-  const vTouch =
-    Math.abs(a.bottom - b.top) <= tolerance ||
-    Math.abs(b.bottom - a.top) <= tolerance;
-
-  return (hTouch && vOverlap) || (vTouch && hOverlap);
-}
-
-function buildPalette() {
-  const root = getComputedStyle(document.documentElement);
-  const vars = ["--dusk-blue", "--blue-slate", "--pale-sky", "--pacific-cyan"];
-
-  // Generates exactly 8 colors: [Blue1, Blue1-Variant, Blue2, Blue2-Variant, etc.]
-  return vars
-    .map((name) => {
-      const val = root.getPropertyValue(name).trim();
-      return hexToHsl(val || "#38506f");
-    })
-    .flatMap(({ h, s, l }) => [
-      { h, s, l }, // Base
-      {
-        h,
-        s: Math.min(s + 10, 100),
-        l: l > 50 ? Math.max(l - 18, 10) : Math.min(l + 18, 90), // Variant
-      },
-    ]);
-}
-
-function createColorPalette(mode) {
-  const palette = buildPalette();
-
-  return function (index, isSub = false, subIndex = 0) {
-    const base = palette[index % palette.length];
-    let { h, s, l } = { ...base };
-
-    if (isSub) {
-      const shift = (subIndex + 1) * 4;
-      l = l > 50 ? l - shift : l + shift;
-      s = Math.min(s + 5, 100);
+  projectList.forEach((project) => {
+    if (isSoloProject(project.object)) {
+      soloProjects.push(project);
+    } else {
+      groupProjects.push(project);
     }
+  });
 
-    const borderL = l > 50 ? Math.min(l + 8, 100) : Math.max(l - 8, 0);
+  const groupIds = groupProjects.map((p) => p.object.id);
+  const memberData = await getGroupMembers(groupIds, jwtoken);
 
-    if (mode == "arc") {
-      l = l < 35 ? (l += 10) : l;
-    }
+  const membersById = Object.fromEntries(
+    memberData.data.object.map((o) => [o.id, o.results]),
+  );
+  groupProjects.forEach((p) => {
+    p.object.results = membersById[p.object.id] ?? [];
+  });
 
-    return {
-      bg: `hsl(${h}, ${s}%, ${l}%)`,
-      border: `hsl(${h}, ${s}%, ${borderL}%)`,
-      isLight: l > 50,
-    };
-  };
+  groupProjects.forEach((project) => {
+    const classifiedProjet = buildProjectData(project, "collab", user);
+    if (classifiedProjet) organizedProjects.push(classifiedProjet);
+  });
+
+  soloProjects.forEach((project) => {
+    const classifiedProjet = buildProjectData(project);
+    if (classifiedProjet) organizedProjects.push(classifiedProjet);
+  });
+
+  return organizedProjects;
 }
 
 function countProjectsByCoworker(organizedProjects) {
@@ -631,10 +578,8 @@ export {
   buildQuarters,
   buildProjectData,
   buildTreemapTile,
-  areAdjacent,
-  createColorPalette,
-  buildPalette,
   formatProjectName,
   isSoloProject,
   countProjectsByCoworker,
+  filterProjectByType,
 };

@@ -58,6 +58,25 @@ async function getUserInfo(jwtoken) {
     labels {
     labelName
     }
+
+    audits(where:{closedAt: {_is_null:true}}) {
+    
+        endAt
+        private {
+          code
+        }
+        group {
+          members {
+            user {
+              login
+            }
+          }
+          captain {
+            login
+          }
+        }
+        
+      }
     
     level: transactions(
       where: { 

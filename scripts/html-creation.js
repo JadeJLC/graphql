@@ -1,4 +1,3 @@
-import { getUserDashboard, getGroupMembers } from "./getdata.js";
 import {
   buildLevelTable,
   getRankName,
@@ -9,7 +8,7 @@ import {
   createHTMLSkill,
   buildProjectData,
   formatProjectName,
-  isSoloProject,
+  filterProjectByType,
 } from "./helpers.js";
 import {
   createSVGLineChart,
@@ -31,7 +30,7 @@ async function createPage(response, jwtoken) {
     return;
   }
 
-  const userData = response.data.user[0];
+  const userData = await response.data.user[0];
   createProfilePage(userData, jwtoken);
 }
 
@@ -262,40 +261,18 @@ function createProjectXPBloc(user) {
   createTreeMap(organizedProjects, user.xp.aggregate.sum.amount);
 }
 
+/**
+ * Génère le bloc contenant le nombre de projet par collaborateur
+ * @param {graphQL data} user Les données de l'utilisateur
+ * @param {token} jwtoken Le token de connexion
+ */
 async function createCollabBloc(user, jwtoken) {
-  console.log("Création du graph 4");
   const projectList = user.progress;
-  let organizedProjects = [];
-  let soloProjects = [];
-  let groupProjects = [];
-
-  projectList.forEach((project) => {
-    if (isSoloProject(project.object)) {
-      soloProjects.push(project);
-    } else {
-      groupProjects.push(project);
-    }
-  });
-
-  const groupIds = groupProjects.map((p) => p.object.id);
-  const memberData = await getGroupMembers(groupIds, jwtoken);
-
-  const membersById = Object.fromEntries(
-    memberData.data.object.map((o) => [o.id, o.results]),
+  const organizedProjects = await filterProjectByType(
+    user,
+    projectList,
+    jwtoken,
   );
-  groupProjects.forEach((p) => {
-    p.object.results = membersById[p.object.id] ?? [];
-  });
-
-  groupProjects.forEach((project) => {
-    const classifiedProjet = buildProjectData(project, "collab", user);
-    if (classifiedProjet) organizedProjects.push(classifiedProjet);
-  });
-
-  soloProjects.forEach((project) => {
-    const classifiedProjet = buildProjectData(project);
-    if (classifiedProjet) organizedProjects.push(classifiedProjet);
-  });
 
   createSVGRadialBarChart(organizedProjects);
 }

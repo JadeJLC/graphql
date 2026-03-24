@@ -1,9 +1,6 @@
 import {
   buildQuarters,
   buildTreemapTile,
-  createColorPalette,
-  buildPalette,
-  areAdjacent,
   formatTime,
   countProjectsByCoworker,
 } from "./helpers.js";
@@ -12,6 +9,7 @@ import {
   animateRadialBars,
   animateTreeMap,
 } from "./animation.js";
+import { buildPalette, createColorPalette, areAdjacent } from "./coloring.js";
 
 const ns = "http://www.w3.org/2000/svg";
 

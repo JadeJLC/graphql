@@ -10,6 +10,7 @@
   --violet: rgba(216, 145, 228, 0.795);
   --semi-blue: rgba(223, 246, 255, 0.747);
 
+  --loading: rgba(223, 246, 255, 0.11);
   --border-shine: #d6f1f8b9;
   --form-back: rgba(56, 80, 111, 0.651);
   --degrade: linear-gradient(
@@ -302,6 +303,54 @@ header {
 }
 
 /* #endregion ***** Formulaire de connexion */
+
+/* #region ***** Page de chargement */
+#loading {
+  width: 100%;
+  height: 100vh;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  background-color: var(--loading);
+}
+#loading div {
+  height: fit-content;
+  width: fit-content;
+  padding: 15px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  text-shadow: 3px 2px 3px var(--pacific-cyan);
+  color: var(--border-shine);
+  font-size: 1.6em;
+  line-height: 87px;
+  font-family: var(--font-tech-ui);
+}
+
+#loading span {
+  animation: waviy 1s infinite;
+  animation-delay: calc(0.1s * var(--i));
+  display: inline-block;
+}
+
+#loading svg {
+  float: left;
+  margin-right: 20px;
+}
+
+@keyframes waviy {
+  0%,
+  40%,
+  100% {
+    transform: translateY(0);
+  }
+  20% {
+    transform: translateY(-20px);
+  }
+}
+
+/* #endregion ***** Page de chargement */
 
 /* #region ***** Tableau de bord - Général */
 .dashboard-bloc {

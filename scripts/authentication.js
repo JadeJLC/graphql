@@ -38,9 +38,14 @@ async function logInSuccess(jwtoken) {
   if (loginPage) loginPage.classList.add("is-hidden");
 
   const dashbooard = document.getElementById("dashboard-page");
+  const loading = document.getElementById("loading");
+
+  if (loading) loading.classList.remove("is-hidden");
+
   if (dashbooard) {
-    dashbooard.classList.remove("is-hidden");
     const userData = await getUserInfo(jwtoken);
+    loading.classList.add("is-hidden");
+    dashbooard.classList.remove("is-hidden");
 
     createPage(userData, jwtoken);
   }
