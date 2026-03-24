@@ -7,6 +7,11 @@ import {
 
 document.addEventListener("DOMContentLoaded", init);
 
+// A ajouter :
+// Event listener qui vérifie les modifications de la base de données
+// Si nouvel audit à faire : envoie une notification sur le PC
+// Si changement d'xp de l'utilisateur, met à jour la page
+
 /**
  * Fonction lancer une fois la page chargée
  */

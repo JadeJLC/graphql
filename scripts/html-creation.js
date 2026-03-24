@@ -288,16 +288,12 @@ function createAuditListBloc(user) {
   const auditBloc = document.getElementById("user-audits");
 
   auditBloc.innerHTML = `<h3 class="bloc-title">Audits</h3>
-  <div class="bloc-xp">À auditer</div>
-  <div class="audit-list">${auditHTML}</div>
-  
-  <div class="bloc-xp">Mes audits</div>`;
+  <div class="audit-list">${auditHTML}</div>`;
 
   auditBloc.addEventListener("click", (event) => {
     const auditCode = event.target.closest(".audit-code");
     if (auditCode) {
       navigator.clipboard.writeText(auditCode.textContent);
-      // console.log("Code copié");
 
       const message = auditCode.firstChild;
 
