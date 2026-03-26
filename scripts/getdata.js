@@ -1,4 +1,5 @@
 import { DOMAIN } from "./authentication.js";
+import { isTokenExpired } from "./helpers.js";
 
 /**
  * Envoie les requêtes GraphQL à l'API
