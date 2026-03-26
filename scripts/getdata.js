@@ -114,6 +114,39 @@ async function getUserInfo(jwtoken) {
       }
     }
 
+    
+    workload : transactions (
+    where: {
+    type: { _nregex: "^(level|skill|xp)" },
+    path: { _like: "%div-01%", _nlike: "%piscine%/%" }
+    }
+    ) {
+    createdAt
+      object  {
+        name
+        type
+        
+        progresses{
+          isDone
+          group {
+          id
+            members {
+              user {
+              firstName
+              lastName
+              login
+              }
+            }
+            captain {
+            firstName
+            lastName
+            login
+            }
+          }
+        }
+      }
+    }
+
     skills: transactions (
     where: {
     type: {_like: "%skill%"}
@@ -156,6 +189,24 @@ async function getUserInfo(jwtoken) {
 `;
 
   return await fetchFromDomain(query, {}, jwtoken);
+}
+
+async function getAuditors(groupId, jwtoken) {
+  const query = `query GetAuditors($groupId: Int!) { 
+     audit (where: {groupId : {_eq: $groupId} }) {
+      group {
+        id
+         auditors {
+          id
+          auditorId
+          auditorLogin
+          closureType
+        }
+      }
+    }
+  }`;
+
+  return await fetchFromDomain(query, { groupId }, jwtoken);
 }
 
 async function getGroupMembers(groupIds, jwtoken) {
@@ -220,4 +271,4 @@ async function getUserDashboard(userID, jwtoken) {
   console.log("Dashboard Data:", progressData);
 }
 
-export { getUserInfo, getUserDashboard, getGroupMembers };
+export { getUserInfo, getUserDashboard, getGroupMembers, getAuditors };

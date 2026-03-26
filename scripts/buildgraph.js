@@ -233,7 +233,7 @@ function createTreeMap(projects) {
     const pool =
       available.length > 0
         ? available
-        : Array.from({ length: palette.length }, (_, k) => k); // fallback
+        : Array.from({ length: palette.length }, (_, k) => k);
     const chosen = pool.reduce((best, k) => (lru[k] < lru[best] ? k : best));
     lru[chosen] = ++tick;
     assigned[i] = chosen;
@@ -296,7 +296,6 @@ function createSVGRadialBarChart(organizedProjects) {
 
   if (collaborators.length === 0) return;
 
-  // Make the SVG fill its container — viewBox is square so the chart is centred
   svg.setAttribute("viewBox", "0 0 400 400");
   svg.setAttribute("width", "70%");
   svg.setAttribute("height", "70%");
@@ -312,8 +311,6 @@ function createSVGRadialBarChart(organizedProjects) {
 
   const maxCount = collaborators[0].count;
 
-  // Arcs are collected here and passed to animate() so animation logic stays
-  // completely separate from rendering logic.
   const arcs = [];
 
   collaborators.forEach((collab, i) => {
@@ -335,7 +332,6 @@ function createSVGRadialBarChart(organizedProjects) {
     track.setAttribute("stroke-width", ringWidth);
     svg.appendChild(track);
 
-    // Coloured arc — hidden initially, revealed by animate()
     const arc = document.createElementNS(ns, "circle");
     arc.setAttribute("cx", cx);
     arc.setAttribute("cy", cy);
@@ -344,7 +340,7 @@ function createSVGRadialBarChart(organizedProjects) {
     arc.setAttribute("stroke", color.bg);
     arc.setAttribute("stroke-width", ringWidth);
     arc.setAttribute("stroke-dasharray", circumference);
-    arc.setAttribute("stroke-dashoffset", circumference); // fully hidden
+    arc.setAttribute("stroke-dashoffset", circumference);
     arc.setAttribute("stroke-linecap", "round");
     arc.setAttribute("transform", `rotate(-90, ${cx}, ${cy})`);
     arc.style.transition = `stroke-dashoffset ${0.6 + i * 0.08}s cubic-bezier(0.4, 0, 0.2, 1) ${i * 0.06}s`;

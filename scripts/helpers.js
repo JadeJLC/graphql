@@ -1,5 +1,5 @@
 import { createColorPalette } from "./coloring.js";
-import { getGroupMembers } from "./getdata.js";
+import { getAuditors, getGroupMembers } from "./getdata.js";
 
 /**
  * Calcule l'xp nécessaire pour passer au prochain niveau (#le code volé dans le js de l'intra)
@@ -169,6 +169,7 @@ function getSkillFullName(skillName) {
     stats: "Statistiques",
     ai: "IA",
     js: "Javascript",
+    game: "Jeux vidéo",
   };
 
   if (fullSkills[skillName]) {
@@ -568,6 +569,20 @@ function countProjectsByCoworker(organizedProjects) {
   return Array.from(map.values()).sort((a, b) => b.count - a.count);
 }
 
+function getProjectGroupMembers(data) {
+  let members = [];
+
+  if (!data.group.members) {
+    return [];
+  }
+
+  data.group.members.forEach((member) => {
+    members.push(member.user);
+  });
+
+  return members;
+}
+
 function buildAuditData(data, index) {
   const captain = {
     login: data.group.captain.login,
@@ -575,25 +590,17 @@ function buildAuditData(data, index) {
     lastName: data.group.captain.lastName,
   };
 
-  let members = [];
-
-  data.group.members.forEach((member) => {
-    members.push(member.user);
-  });
-
   const audit = {
     end: data.endAt,
     code: data.private.code,
     project: buildProjectData(data.group).name,
-    members: members,
+    members: getProjectGroupMembers(data),
     captain: captain,
   };
 
   const getColor = createColorPalette();
   const color = getColor(index);
   const subColors = getColor(index, true, index + 1);
-
-  console.log(audit);
 
   let memberList = ``;
   audit.members.forEach((member) => {
@@ -602,12 +609,12 @@ function buildAuditData(data, index) {
   });
 
   const auditData = `<div class="audit-bloc" title="${audit.project} - ${audit.captain.login}" 
-  style="border-color:${color.border};background-color:${color.bg};color:${color.isLight ? "var(--dusk-blue)" : "var(--pale-sky)"}"
+  style="background-color:${color.bg};color:${color.isLight ? "var(--dusk-blue)" : "var(--pale-sky)"}"
   >
   <span class="audit-project" style="background-color:${subColors.bg}">${audit.project}</span><i data-lucide="badge-plus"></i>
   <span class="audit-captain" style="background-color:${subColors.bg}">${audit.captain.login} </span>
   <span class="audit-code" style="border-color:${subColors.bg}"><span>Code<br/> copié !</span>
-  ${audit.code}  
+  <div>${audit.code}</div>
   </span> 
   <span class="audit-date">Expire le<br/> ${formatTime(audit.end)}</span>
 
@@ -619,6 +626,94 @@ function buildAuditData(data, index) {
   </div>`;
 
   return auditData;
+}
+
+function buildCurrentProjectHTML(project, index) {
+  const getColor = createColorPalette();
+  const color = getColor(index);
+  const subColors = getColor(index, true, index + 1);
+
+  let auditorList = ``;
+  project.auditors.forEach((auditor) => {
+    auditorList += `${auditor.login}<br/>`;
+  });
+
+  const projectData = `<div class="audit-bloc" title="${project.name} - ${project.captain.login}" 
+  style="background-color:${color.bg};color:${color.isLight ? "var(--dusk-blue)" : "var(--pale-sky)"}"
+  >
+  <span class="audit-project" style="background-color:${subColors.bg}">${project.name}</span><i data-lucide="badge-plus"></i>
+  <span class="audit-captain" style="background-color:${subColors.bg}">${project.captain.login} </span>
+  <span class="audit-count" style="border-color:${subColors.bg}">${project.count} / 5
+  </span> 
+  <span class="audit-date">Terminé le<br/> ${project.start}</span>
+  <div class="audit-plus" style="background-color:${subColors.bg}">
+  <span class="capitalize"><b>${project.name}<b/></span>
+  ${auditorList}
+  </div>
+  </div>`;
+
+  return projectData;
+}
+
+async function getMyCurrentProject(workload, jwtoken) {
+  let currentProjects = [];
+  for (const project of workload) {
+    let projectData;
+
+    if (
+      !project.object.progresses[0].isDone &&
+      project.object.type == "project"
+    ) {
+      const auditorData = await getAuditors(
+        project.object.progresses[0].group.id,
+        jwtoken,
+      );
+
+      let validAudits = 0;
+      let filterAuditors = [];
+
+      auditorData.data.audit[0].group.auditors.forEach((auditor) => {
+        if (auditor.closureType == "succeeded") {
+          validAudits++;
+        } else if (auditor.closureType == null) {
+          filterAuditors.push(auditor);
+        }
+      });
+
+      let auditors = [];
+
+      filterAuditors.forEach((auditor) => {
+        auditors.push({ login: auditor.auditorLogin, id: auditor.id });
+      });
+
+      const captain = {
+        login: project.object.progresses[0].group.captain.login,
+        firstName: project.object.progresses[0].group.captain.firstName,
+        lastName: project.object.progresses[0].group.captain.lastName,
+      };
+
+      projectData = {
+        name: formatProjectName(project.object).name,
+        start: formatTime(project.createdAt),
+        count: validAudits,
+        captain: captain,
+        auditors: auditors,
+      };
+      currentProjects.push(projectData);
+    }
+  }
+
+  const uniqueProjects = [
+    ...new Map(currentProjects.map((item) => [item.name, item])).values(),
+  ];
+
+  let HTMLbloc = ``;
+
+  uniqueProjects.forEach((project, index) => {
+    HTMLbloc += buildCurrentProjectHTML(project, index);
+  });
+
+  return HTMLbloc;
 }
 
 export {
@@ -637,4 +732,5 @@ export {
   countProjectsByCoworker,
   filterProjectByType,
   buildAuditData,
+  getMyCurrentProject,
 };

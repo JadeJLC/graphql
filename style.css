@@ -611,17 +611,17 @@ header {
 .audit-list {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  /* justify-content: space-between; */
 }
 
 .audit-bloc {
   max-width: 33%;
   text-align: center;
-  border: 3px solid;
   padding: 5px;
   overflow: hidden;
   max-height: 35px;
   transition: all 0.5s ease;
+  border-radius: 3px;
 }
 
 .audit-bloc:hover {
@@ -672,9 +672,13 @@ header {
   transition: all 0.3s ease;
 }
 
-.audit-code {
-  background-color: var(--dusk-blue);
+.audit-bloc .audit-code {
   cursor: copy;
+}
+
+.audit-bloc .audit-code,
+.audit-bloc .audit-count {
+  background-color: var(--dusk-blue);
   margin-top: 10px !important;
   width: fit-content;
   position: relative;

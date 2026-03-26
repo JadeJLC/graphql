@@ -10,6 +10,7 @@ import {
   formatProjectName,
   filterProjectByType,
   buildAuditData,
+  getMyCurrentProject,
 } from "./helpers.js";
 import {
   createSVGLineChart,
@@ -40,7 +41,7 @@ async function createPage(response, jwtoken) {
  * et dans le header
  * @param {object} user Les informations de l'utilisateur
  */
-function createProfilePage(user, jwtoken) {
+async function createProfilePage(user, jwtoken) {
   const headername = document.getElementById("header-username");
 
   if (user) {
@@ -58,7 +59,7 @@ function createProfilePage(user, jwtoken) {
   createXPProgressBloc(user);
   createProjectXPBloc(user);
   createCollabBloc(user, jwtoken);
-  createAuditListBloc(user);
+  await createAuditListBloc(user, jwtoken);
 
   lucide.createIcons();
 }
@@ -279,21 +280,40 @@ async function createCollabBloc(user, jwtoken) {
   createSVGRadialBarChart(organizedProjects);
 }
 
-function createAuditListBloc(user) {
+async function createAuditListBloc(user, jwtoken) {
   let auditHTML = ``;
   user.audits.forEach((audit, index) => {
     auditHTML += buildAuditData(audit, index);
   });
 
+  let currentProjects = await getMyCurrentProject(user.workload, jwtoken);
+
   const auditBloc = document.getElementById("user-audits");
 
   auditBloc.innerHTML = `<h3 class="bloc-title">Audits</h3>
-  <div class="audit-list">${auditHTML}</div>`;
+  ${
+    auditHTML
+      ? `<div class="bloc-xp">Projets à auditer</div><div class="audit-list">${auditHTML}</div>`
+      : ""
+  }
+  ${
+    currentProjects
+      ? `<br/><div class="bloc-xp">Mes projets</div><div class="audit-list">${currentProjects}</div>`
+      : ""
+  }
+
+      ${
+        !currentProjects && auditHTML
+          ? `<div class="bloc-xp>Aucun audit à afficher pour l'instant</div>`
+          : ""
+      }
+    `;
 
   auditBloc.addEventListener("click", (event) => {
     const auditCode = event.target.closest(".audit-code");
     if (auditCode) {
-      navigator.clipboard.writeText(auditCode.textContent);
+      const codeText = auditCode.querySelector("div");
+      navigator.clipboard.writeText(codeText.textContent);
 
       const message = auditCode.firstChild;
 
@@ -312,19 +332,27 @@ function createAuditListBloc(user) {
     if (zoomBtn) {
       const parent = zoomBtn.closest(".audit-bloc");
       const auditPlus = parent.querySelector(".audit-plus");
-      if (auditPlus) auditPlus.classList.add("show");
+      if (auditPlus) {
+        auditPlus.classList.add("show");
 
-      auditPlus.addEventListener(
-        "click",
-        () => {
+        setTimeout(() => {
+          auditPlus.style.overflow = "auto";
+        }, 500);
+
+        auditPlus.addEventListener(
+          "click",
+          () => {
+            auditPlus.style.overflow = "";
+            auditPlus.classList.remove("show");
+          },
+          { once: true },
+        );
+
+        setTimeout(() => {
+          auditPlus.style.overflow = "";
           auditPlus.classList.remove("show");
-        },
-        { once: true },
-      );
-
-      setTimeout(() => {
-        auditPlus.classList.remove("show");
-      }, 7000);
+        }, 7000);
+      }
     }
   });
 }
