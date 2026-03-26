@@ -30,7 +30,7 @@ async function logIn(encodedData) {
  * @param {token} jwtoken Le token de connexion pour récupérer les données de l'utilisateur
  */
 async function logInSuccess(jwtoken) {
-  await Notification.requestPermission();
+  Notification.requestPermission();
 
   setInterval(() => {
     checkApiUpdates();

@@ -278,7 +278,6 @@ function createTreeMap(projects) {
 
 function createCollabCaption(coworker, colors) {
   const captionZone = document.getElementById("collab-names");
-  captionZone.innerHTML = "";
 
   const coworkerInfo = document.createElement("span");
   coworkerInfo.classList.add("collab-cw");
@@ -319,6 +318,9 @@ function createSVGRadialBarChart(organizedProjects) {
   const maxCount = collaborators[0].count;
 
   const arcs = [];
+
+  const captionZone = document.getElementById("collab-names");
+  captionZone.innerHTML = "";
 
   collaborators.forEach((collab, i) => {
     const r = maxRadius - i * slotSize;
