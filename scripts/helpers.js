@@ -674,6 +674,8 @@ async function getMyCurrentProject(workload, jwtoken) {
   for (const project of workload) {
     let projectData;
 
+    if (!project.object.progresses) return;
+
     if (
       !project.object.progresses[0].isDone &&
       project.object.type == "project"

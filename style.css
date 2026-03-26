@@ -615,6 +615,7 @@ header {
 }
 
 .audit-bloc {
+  margin-right: 2px;
   max-width: 33%;
   text-align: center;
   padding: 5px;

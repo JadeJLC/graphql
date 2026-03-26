@@ -237,18 +237,18 @@ async function checkApiUpdates() {
 
   if (isTokenExpired(jwtoken)) return;
 
-  const query = `
-  query checkUpdates {
+  const query = `query checkUpdates {
     user {      
     totalDown
     totalUp
 
     audits(where:{closedAt: {_is_null:true}}) {
-        endAt        
-    }
-      groups {
+        endAt  
+      group {
         id
       }
+    }
+    
 
     xp: transactions_aggregate(
     where: {
@@ -260,7 +260,7 @@ async function checkApiUpdates() {
         sum {
             amount
         }
-  }
+    }
 }
 
 }
