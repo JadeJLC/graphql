@@ -191,9 +191,15 @@ function createTreeMap(projects) {
 
   const maxXP = items[0].totalXP;
 
+  const dynamicCols = Math.max(12, Math.round(items.length * 1.5));
+
+  Object.assign(container.style, {
+    gridTemplateColumns: `repeat(${dynamicCols}, 1fr)`,
+  });
+
   const tiles = items.map((item) => {
     const ratio = item.totalXP / maxXP;
-    const colSpan = Math.max(1, Math.round(Math.pow(ratio, 0.35) * 9));
+    const colSpan = Math.max(1, Math.ceil(Math.pow(ratio, 0.35) * 9));
     const rowSpan = Math.max(1, Math.ceil(Math.sqrt(ratio) * 4));
 
     const tile = buildTreemapTile(item.name, item.totalXP, item.type);
