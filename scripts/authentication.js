@@ -1,6 +1,6 @@
 const DOMAIN = "zone01normandie.org";
 import { createPage } from "./html-creation.js";
-import { getUserInfo } from "./getdata.js";
+import { getUserInfo, checkApiUpdates } from "./getdata.js";
 
 /**
  * Fonction principale de connexion : récupère les identifiants et les envoie à l'API
@@ -30,6 +30,12 @@ async function logIn(encodedData) {
  * @param {token} jwtoken Le token de connexion pour récupérer les données de l'utilisateur
  */
 async function logInSuccess(jwtoken) {
+  await Notification.requestPermission();
+
+  setInterval(() => {
+    checkApiUpdates();
+  }, 60000);
+
   console.log("Connexion en cours");
   const alertZone = document.getElementById("login-alert");
   if (alertZone) alertZone.classList.add("is-hidden");
@@ -37,11 +43,17 @@ async function logInSuccess(jwtoken) {
   const loginPage = document.getElementById("login-page");
   if (loginPage) loginPage.classList.add("is-hidden");
 
-  const dashbooard = document.getElementById("dashboard-page");
   const loading = document.getElementById("loading");
 
   if (loading) loading.classList.remove("is-hidden");
 
+  loadPageData(jwtoken);
+
+  localStorage.setItem("jwt", jwtoken);
+}
+
+async function loadPageData(jwtoken) {
+  const dashbooard = document.getElementById("dashboard-page");
   if (dashbooard) {
     const userData = await getUserInfo(jwtoken);
 
@@ -56,8 +68,6 @@ async function logInSuccess(jwtoken) {
 
     createPage(userData, jwtoken);
   }
-
-  localStorage.setItem("jwt", jwtoken);
 }
 
 /**
@@ -104,7 +114,7 @@ function showHidePassword() {
     showPassZone.title = showPassZone.alt = "Masquer le mot de passe";
     passInput.type = "text";
     lucide.createIcons();
-  } else if ((passInput.type = "text")) {
+  } else if (passInput.type == "text") {
     showPassBtn.dataset.lucide = "eye";
     showPassZone.title = showPassZone.alt = "Afficher le mot de passe";
     passInput.type = "password";
@@ -112,4 +122,11 @@ function showHidePassword() {
   }
 }
 
-export { logInSuccess, sendFormData, logOut, showHidePassword, DOMAIN };
+export {
+  logInSuccess,
+  sendFormData,
+  logOut,
+  showHidePassword,
+  DOMAIN,
+  loadPageData,
+};

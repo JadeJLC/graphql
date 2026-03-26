@@ -1,5 +1,6 @@
 import { createColorPalette } from "./coloring.js";
 import { getAuditors, getGroupMembers } from "./getdata.js";
+import { logOut } from "./authentication.js";
 
 /**
  * Calcule l'xp nécessaire pour passer au prochain niveau (#le code volé dans le js de l'intra)
@@ -28,6 +29,20 @@ function buildLevelTable() {
   }
 
   return data;
+}
+
+function isTokenExpired(token) {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    if (!payload.exp || Date.now() >= payload.exp * 1000) {
+      const loading = document.getElementById("loading");
+      logOut();
+      if (loading) loading.classList.add("is-hidden");
+      return true;
+    }
+  } catch {
+    return true;
+  }
 }
 
 /**
@@ -565,7 +580,6 @@ function countProjectsByCoworker(organizedProjects) {
     });
   });
 
-  console.log(Array.from(map.values()).sort((a, b) => b.count - a.count));
   return Array.from(map.values()).sort((a, b) => b.count - a.count);
 }
 
@@ -733,4 +747,5 @@ export {
   filterProjectByType,
   buildAuditData,
   getMyCurrentProject,
+  isTokenExpired,
 };

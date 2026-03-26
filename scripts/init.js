@@ -3,14 +3,22 @@ import {
   sendFormData,
   logOut,
   showHidePassword,
+  loadPageData,
 } from "./authentication.js";
+import { fetchFromDomain } from "./getdata.js";
+import { isTokenExpired } from "./helpers.js";
 
-document.addEventListener("DOMContentLoaded", init);
+const APIdata = {
+  currentxp: 0,
+  currentUp: 0,
+  currentDown: 0,
+  auditsToDo: 0,
+  currentProjects: 0,
+};
 
-// A ajouter :
-// Event listener qui vérifie les modifications de la base de données
-// Si nouvel audit à faire : envoie une notification sur le PC
-// Si changement d'xp de l'utilisateur, met à jour la page
+document.addEventListener("DOMContentLoaded", function () {
+  init();
+});
 
 /**
  * Fonction lancer une fois la page chargée
@@ -20,7 +28,7 @@ function init() {
   const jwtoken = localStorage.getItem("jwt");
 
   if (jwtoken) {
-    logInSuccess(jwtoken);
+    if (!isTokenExpired(jwtoken)) logInSuccess(jwtoken);
   }
 
   setEventListeners();
@@ -49,3 +57,5 @@ function setEventListeners() {
     }
   });
 }
+
+export { APIdata };

@@ -230,45 +230,71 @@ async function getGroupMembers(groupIds, jwtoken) {
   return await fetchFromDomain(query, { groupIds }, jwtoken);
 }
 
-/**
- * Formule la query pour récupérer l'xp et toutes les informations statistiques de l'utilisateur
- * @param {string} userID Identifiant de l'utilisateur dans l'API
- * @param {token} jwtoken Le token de connexion
- */
-async function getUserDashboard(userID, jwtoken) {
-  const query = `query GetUserActivity($userID: Int!) {
-    transaction(where: { userId: { _eq: $userID } }) {
-      type
-      amount
-      objectId
-      createdAt
-      path
-    }
+async function checkApiUpdates() {
+  console.log("Recherche de mises à jour");
+  const jwtoken = localStorage.getItem("jwt");
 
-    progress(where: { userId: { _eq: $userID } }) {
-      objectId
-      grade
-      createdAt
-      updatedAt
-      path
-    }
-    result(where: {userId : {_eq:$userID}}) {
-      objectId	
-      grade	
-      type	
-      createdAt	
-      updatedAt	
-      path
-    }
-    object {
-      name	
-      type	
-      attrs
-    }
-  }`;
+  if (isTokenExpired(jwtoken)) return;
 
-  const progressData = await fetchFromDomain(query, { userID }, jwtoken);
-  console.log("Dashboard Data:", progressData);
+  const query = `
+  query checkUpdates {
+    user {      
+    totalDown
+    totalUp
+
+    audits(where:{closedAt: {_is_null:true}}) {
+        endAt        
+    }
+      groups {
+        id
+      }
+
+    xp: transactions_aggregate(
+    where: {
+        type: { _eq: "xp" }
+        path: { _like: "%div-01%", _nlike: "%piscine%/%" }
+    }
+    ) {
+    aggregate {
+        sum {
+            amount
+        }
+  }
 }
 
-export { getUserInfo, getUserDashboard, getGroupMembers, getAuditors };
+}
+  }`;
+
+  const data = await fetchFromDomain(query, {}, jwtoken);
+
+  const XP = data.user.xp.aggregate.sum.amount;
+  const ratioUp = data.user.totalUp;
+  const ratioDown = data.user.totalDown;
+
+  if (
+    XP != APIdata.currentxp ||
+    ratioDown != APIdata.currentDown ||
+    ratioUp != APIdata.currentUp
+  ) {
+    console.log("Nouvelles données. Rechargement de la page.");
+    loadPageData(jwtoken);
+  }
+
+  if (data.user.audits.length != APIdata.auditsToDo) {
+    if (Notification.permission === "granted") {
+      new Notification("Nouvel audit à faire", {
+        body: "Une nouvelle demande d'audit est arrivée. Le code de validation est disponible sur votre tableau de bord",
+        icon: "../favicon.ico",
+      });
+    }
+    loadPageData(jwtoken);
+  }
+}
+
+export {
+  getUserInfo,
+  getGroupMembers,
+  getAuditors,
+  fetchFromDomain,
+  checkApiUpdates,
+};

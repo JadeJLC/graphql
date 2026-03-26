@@ -19,6 +19,7 @@ import {
   createTreeMap,
 } from "./buildgraph.js";
 import { animateXPGraph } from "./animation.js";
+import { APIdata } from "./init.js";
 
 /**
  * Transforme la page HTML avec les données récupérées
@@ -26,7 +27,6 @@ import { animateXPGraph } from "./animation.js";
  * @returns
  */
 async function createPage(response, jwtoken) {
-  console.log("User Data : ", response);
   if (response === "logout") {
     displayLoginPage();
     return;
@@ -103,6 +103,7 @@ function createProfileBloc(user) {
 function createLevelBloc(user) {
   const levelSection = document.getElementById("user-exp");
   const currentXP = user.xp.aggregate.sum.amount;
+  APIdata.currentxp = currentXP;
   const currentLvl = user.level[0].amount;
 
   const xpData = buildLevelTable();
@@ -185,6 +186,9 @@ function createAuditRatioBloc(user) {
     received: user.totalDown,
     total: user.totalUp + user.totalUpBonus + user.totalDown,
   };
+
+  APIdata.currentDown = user.totalDown;
+  APIdata.currentUp = user.totalUp;
 
   if (ratio.total == 0) return;
 
@@ -286,6 +290,8 @@ async function createAuditListBloc(user, jwtoken) {
     auditHTML += buildAuditData(audit, index);
   });
 
+  APIdata.auditsToDo = user.audits.length;
+
   let currentProjects = await getMyCurrentProject(user.workload, jwtoken);
 
   const auditBloc = document.getElementById("user-audits");
@@ -317,7 +323,6 @@ async function createAuditListBloc(user, jwtoken) {
 
       const message = auditCode.firstChild;
 
-      console.log(message.innerHTML);
       message.style.bottom = "1px";
       message.style.maxHeight = "50px";
 
