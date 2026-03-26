@@ -278,6 +278,7 @@ function createTreeMap(projects) {
 
 function createCollabCaption(coworker, colors) {
   const captionZone = document.getElementById("collab-names");
+  captionZone.innerHTML = "";
 
   const coworkerInfo = document.createElement("span");
   coworkerInfo.classList.add("collab-cw");
