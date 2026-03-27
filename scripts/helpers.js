@@ -674,7 +674,7 @@ async function getMyCurrentProject(workload, jwtoken) {
   for (const project of workload) {
     let projectData;
 
-    if (!project.object.progresses) return;
+    if (!project.object.progresses || !project.object) continue;
 
     if (
       !project.object.progresses[0].isDone &&
@@ -718,6 +718,8 @@ async function getMyCurrentProject(workload, jwtoken) {
       currentProjects.push(projectData);
     }
   }
+
+  if (currentProjects.length <= 0) return ``;
 
   const uniqueProjects = [
     ...new Map(currentProjects.map((item) => [item.name, item])).values(),

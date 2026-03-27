@@ -5,7 +5,7 @@ import {
   showHidePassword,
   loadPageData,
 } from "./authentication.js";
-import { fetchFromDomain } from "./getdata.js";
+import { checkApiUpdates, fetchFromDomain } from "./getdata.js";
 import { isTokenExpired } from "./helpers.js";
 
 const APIdata = {

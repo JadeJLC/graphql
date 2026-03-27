@@ -309,7 +309,7 @@ async function createAuditListBloc(user, jwtoken) {
   }
 
       ${
-        !currentProjects && auditHTML
+        !currentProjects && !auditHTML
           ? `<div class="bloc-xp>Aucun audit à afficher pour l'instant</div>`
           : ""
       }

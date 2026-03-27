@@ -1,5 +1,7 @@
 import { DOMAIN } from "./authentication.js";
 import { isTokenExpired } from "./helpers.js";
+import { APIdata } from "./init.js";
+import { loadPageData } from "./authentication.js";
 
 /**
  * Envoie les requêtes GraphQL à l'API
@@ -266,11 +268,11 @@ async function checkApiUpdates() {
 }
   }`;
 
-  const data = await fetchFromDomain(query, {}, jwtoken);
+  const reponse = await fetchFromDomain(query, {}, jwtoken);
 
-  const XP = data.user.xp.aggregate.sum.amount;
-  const ratioUp = data.user.totalUp;
-  const ratioDown = data.user.totalDown;
+  const XP = reponse.data.user[0].xp.aggregate.sum.amount;
+  const ratioUp = reponse.data.user[0].totalUp;
+  const ratioDown = reponse.data.user[0].totalDown;
 
   if (
     XP != APIdata.currentxp ||
@@ -281,7 +283,7 @@ async function checkApiUpdates() {
     loadPageData(jwtoken);
   }
 
-  if (data.user.audits.length != APIdata.auditsToDo) {
+  if (reponse.data.user[0].audits.length != APIdata.auditsToDo) {
     if (Notification.permission === "granted") {
       new Notification("Nouvel audit à faire", {
         body: "Une nouvelle demande d'audit est arrivée. Le code de validation est disponible sur votre tableau de bord",

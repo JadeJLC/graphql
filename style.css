@@ -639,6 +639,7 @@ header {
   max-width: 95%;
   padding: 0px 3px;
   overflow: hidden;
+  min-height: 18px;
 }
 
 .audit-bloc {
