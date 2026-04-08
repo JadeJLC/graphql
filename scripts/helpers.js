@@ -661,7 +661,7 @@ function buildCurrentProjectHTML(project, index) {
   </span> 
   <span class="audit-date">Terminé le<br/> ${project.start}</span>
   <div class="audit-plus" style="background-color:${subColors.bg}">
-  <span class="capitalize"><b>${project.name}<b/></span>
+  <span class="capitalize"><b>${project.name}</b></span>
   ${auditorList}
   </div>
   </div>`;

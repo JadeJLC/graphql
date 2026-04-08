@@ -283,7 +283,7 @@ async function checkApiUpdates() {
     loadPageData(jwtoken);
   }
 
-  if (reponse.data.user[0].audits.length != APIdata.auditsToDo) {
+  if (reponse.data.user[0].audits.length > APIdata.auditsToDo) {
     if (Notification.permission === "granted") {
       new Notification("Nouvel audit à faire", {
         body: "Une nouvelle demande d'audit est arrivée. Le code de validation est disponible sur votre tableau de bord",
