@@ -659,7 +659,7 @@ function buildCurrentProjectHTML(project, index) {
   <span class="audit-captain" style="background-color:${subColors.bg}">${project.captain.login} </span>
   <span class="audit-count" style="border-color:${subColors.bg}">${project.count} / 5
   </span> 
-  <span class="audit-date">Terminé le<br/> ${project.start}</span>
+  <span class="audit-date">Terminé ${project.start == "Aujourd'hui" || project.start == "Hier" ? "" : "le"}<br/> ${project.start}</span>
   <div class="audit-plus" style="background-color:${subColors.bg}">
   <span class="capitalize"><b>${project.name}</b></span>
   ${auditorList}
