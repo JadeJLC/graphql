@@ -688,7 +688,7 @@ async function getMyCurrentProject(workload, jwtoken) {
       let validAudits = 0;
       let filterAuditors = [];
 
-      if (!auditorData.data.audit[0].group) continue;
+      if (!auditorData.data.audit[0]) continue;
 
       auditorData.data.audit[0].group.auditors.forEach((auditor) => {
         if (auditor.closureType == "succeeded") {
