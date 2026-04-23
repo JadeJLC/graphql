@@ -110,7 +110,7 @@ function createColorPalette(mode) {
     return {
       bg: `hsl(${h}, ${s}%, ${l}%)`,
       border: `hsl(${h}, ${s}%, ${borderL}%)`,
-      isLight: l > 60,
+      isLight: l > 50,
     };
   };
 }
